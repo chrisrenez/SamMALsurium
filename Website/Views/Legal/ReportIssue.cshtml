@@ -1,0 +1,75 @@
+@{
+    ViewData["Title"] = "Fehler melden";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <h1 class="mb-4">Einen Fehler melden</h1>
+
+            <p class="lead mb-4">
+                Haben Sie einen Fehler auf unserer Website entdeckt? Helfen Sie uns,
+                SamMALsurium zu verbessern, indem Sie uns darüber informieren!
+            </p>
+
+            <div class="card-base card-padding">
+                <form id="issue-report-form">
+                    <div class="mb-3">
+                        <label for="issue-type" class="form-label">Art des Fehlers</label>
+                        <select class="form-select" id="issue-type" required>
+                            <option value="">Bitte wählen...</option>
+                            <option value="technical">Technischer Fehler</option>
+                            <option value="content">Inhaltlicher Fehler</option>
+                            <option value="design">Design-Problem</option>
+                            <option value="security">Sicherheitsproblem</option>
+                            <option value="other">Sonstiges</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="page-url" class="form-label">Betroffene Seite (URL)</label>
+                        <input type="url" class="form-control" id="page-url"
+                               placeholder="https://sammalsurium.at/...">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="issue-title" class="form-label">Kurze Beschreibung</label>
+                        <input type="text" class="form-control" id="issue-title"
+                               placeholder="Z.B. 'Login-Button funktioniert nicht'" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="issue-description" class="form-label">Detaillierte Beschreibung</label>
+                        <textarea class="form-control" id="issue-description" rows="6"
+                                  placeholder="Bitte beschreiben Sie den Fehler so genau wie möglich..."
+                                  required></textarea>
+                        <small class="form-text text-muted">
+                            Hilfreiche Informationen: Browser, Betriebssystem, Schritte zur Reproduktion
+                        </small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="reporter-email" class="form-label">Ihre E-Mail (optional)</label>
+                        <input type="email" class="form-control" id="reporter-email"
+                               placeholder="Falls wir Rückfragen haben...">
+                    </div>
+
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i>
+                        <strong>Hinweis:</strong> Bei Sicherheitsproblemen senden Sie bitte eine E-Mail direkt an
+                        <a href="mailto:security@sammalsurium.at">security@sammalsurium.at</a>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-bug"></i> Fehler melden
+                    </button>
+                </form>
+            </div>
+
+            <div class="mt-4">
+                <a href="/" class="btn btn-secondary">Zurück zur Startseite</a>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,63 @@
+@{
+    ViewData["Title"] = "Kontakt";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <h1 class="mb-4">Kontakt</h1>
+
+            <p class="lead mb-4">
+                Haben Sie Fragen oder Anregungen? Wir freuen uns über Ihre Nachricht!
+            </p>
+
+            <div class="card-base card-padding mb-4">
+                <h2 class="h4 mb-3">Kontaktinformationen</h2>
+                <p>
+                    <strong>E-Mail:</strong> <a href="mailto:info@sammalsurium.at">info@sammalsurium.at</a><br>
+                    <strong>Telefon:</strong> [Telefonnummer]
+                </p>
+
+                <h3 class="h5 mt-4 mb-3">Adresse</h3>
+                <p>
+                    SamMALsurium<br>
+                    [Straße und Hausnummer]<br>
+                    [PLZ und Ort]<br>
+                    Österreich
+                </p>
+            </div>
+
+            <div class="card-base card-padding">
+                <h2 class="h4 mb-3">Kontaktformular</h2>
+                <form id="contact-form">
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Name</label>
+                        <input type="text" class="form-control" id="name" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="email" class="form-label">E-Mail-Adresse</label>
+                        <input type="email" class="form-control" id="email" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="subject" class="form-label">Betreff</label>
+                        <input type="text" class="form-control" id="subject" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="message" class="form-label">Nachricht</label>
+                        <textarea class="form-control" id="message" rows="6" required></textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Nachricht senden</button>
+                </form>
+            </div>
+
+            <div class="mt-4">
+                <a href="/" class="btn btn-secondary">Zurück zur Startseite</a>
+            </div>
+        </div>
+    </div>
+</div>

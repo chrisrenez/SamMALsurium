@@ -1,0 +1,469 @@
+/* Hero Carousel Styles */
+
+/* Carousel Container */
+.hero-carousel {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    background-color: #FAF6F1;
+    border-radius: 15px;
+    box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Slides Container */
+.carousel-slides {
+    position: relative;
+    width: 100%;
+    height: 400px;
+    /* Default height, can be adjusted */
+}
+
+/* Individual Slide */
+.carousel-slide {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    visibility: hidden;
+    transition: none;
+    /* Transitions will be added dynamically */
+}
+
+.carousel-slide.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Animation Classes */
+
+/* Exit animations - current slide leaving */
+.carousel-slide.exit-left {
+    animation: slideOutLeft var(--carousel-speed, 500ms) ease-in-out forwards;
+}
+
+.carousel-slide.exit-right {
+    animation: slideOutRight var(--carousel-speed, 500ms) ease-in-out forwards;
+}
+
+/* Enter animations - next slide entering */
+.carousel-slide.enter-left {
+    animation: slideInLeft var(--carousel-speed, 500ms) ease-in-out forwards;
+}
+
+.carousel-slide.enter-right {
+    animation: slideInRight var(--carousel-speed, 500ms) ease-in-out forwards;
+}
+
+/* Keyframe Animations */
+
+/* Slide out to the left */
+@keyframes slideOutLeft {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+
+    to {
+        transform: translateX(-100%);
+        opacity: 0;
+    }
+}
+
+/* Slide out to the right */
+@keyframes slideOutRight {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+
+    to {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+}
+
+/* Slide in from the left */
+@keyframes slideInLeft {
+    from {
+        transform: translateX(-100%);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Slide in from the right */
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Arrow Buttons */
+.carousel-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: var(--bs-primary, #8B4513);
+    font-size: 2rem;
+    cursor: pointer;
+    z-index: 10;
+    transition: opacity 0.3s ease, transform 0.2s ease;
+    padding: 0;
+    line-height: 1;
+}
+
+.carousel-arrow:hover {
+    opacity: 0.8;
+    transform: translateY(-50%) scale(1.1);
+}
+
+.carousel-arrow:active {
+    transform: translateY(-50%) scale(0.95);
+}
+
+.carousel-arrow-left {
+    left: 20px;
+}
+
+.carousel-arrow-right {
+    right: 20px;
+}
+
+.carousel-arrow i {
+    display: block;
+}
+
+/* Indicator Dots */
+.carousel-indicators {
+    position: absolute;
+    bottom: 1rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    z-index: 10;
+    margin: 0 !important;
+}
+
+.carousel-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.5);
+    border: 2px solid var(--bs-primary, #8B4513);
+    cursor: pointer;
+    padding: 0;
+    transition: all 0.3s ease;
+}
+
+.carousel-dot:hover {
+    background-color: rgba(255, 255, 255, 0.8);
+    transform: scale(1.2);
+}
+
+.carousel-dot.active {
+    background-color: var(--bs-primary, #8B4513);
+    transform: scale(1.3);
+}
+
+/* Responsive Styles - Mobile First */
+
+/* Mobile (default) */
+.carousel-slides {
+    height: auto;
+    min-height: 580px;
+}
+
+.carousel-arrow {
+    font-size: 1.35rem;
+}
+
+.carousel-arrow-left {
+    left: 10px;
+}
+
+.carousel-arrow-right {
+    right: 10px;
+}
+
+/* Hero card adjustments for mobile */
+.hero-card {
+    flex-direction: column;
+    gap: 0;
+    padding: 0;
+}
+
+.hero-image {
+    flex: 0 0 auto;
+    width: 100%;
+    height: 180px;
+    order: -1;
+    margin: 0;
+    padding: 0;
+}
+
+.hero-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 15px 15px 0 0;
+    display: block;
+}
+
+.hero-content {
+    padding: 20px;
+    order: 1;
+}
+
+.hero-heading {
+    font-size: 22px;
+    margin-bottom: 10px;
+}
+
+.hero-text {
+    font-size: 12px;
+    line-height: 1.3;
+    margin-bottom: 10px;
+}
+
+.hero-text:last-of-type {
+    margin-bottom: 12px;
+}
+
+.hero-buttons {
+    gap: 10px;
+    flex-direction: column;
+    align-items: stretch;
+}
+
+.hero-btn {
+    padding: 8px 12px;
+    font-size: 12px;
+    text-align: center;
+}
+
+/* Position arrows at vertical center of image on mobile */
+.carousel-arrow {
+    top: 90px;
+    transform: none;
+}
+
+.carousel-arrow:hover {
+    transform: scale(1.1);
+}
+
+.carousel-arrow:active {
+    transform: scale(0.95);
+}
+
+/* Position indicator dots at bottom of image on mobile */
+.carousel-indicators {
+    bottom: auto;
+    top: 160px;
+}
+
+/* Tablet */
+@media (min-width: 768px) {
+    .carousel-slides {
+        height: 400px;
+    }
+
+    .carousel-arrow {
+        font-size: 1.65rem;
+        top: 50%;
+        transform: translateY(-50%);
+    }
+
+    .carousel-arrow:hover {
+        transform: translateY(-50%) scale(1.1);
+    }
+
+    .carousel-arrow:active {
+        transform: translateY(-50%) scale(0.95);
+    }
+
+    .carousel-arrow-left {
+        left: 15px;
+    }
+
+    .carousel-arrow-right {
+        right: 15px;
+    }
+
+    /* Reset indicator dots to bottom */
+    .carousel-indicators {
+        bottom: 1rem;
+        top: auto;
+    }
+
+    /* Hero card adjustments for tablet - restore horizontal layout */
+    .hero-card {
+        flex-direction: row;
+    }
+
+    .hero-image {
+        flex: 0 0 33.333%;
+        width: 33.333%;
+        height: 100%;
+        order: 0;
+    }
+
+    .hero-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 0 15px 15px 0;
+    }
+
+    .hero-content {
+        padding: 30px 15px 30px 60px;
+        order: 0;
+    }
+
+    .hero-heading {
+        font-size: 28px;
+        margin-bottom: 12px;
+    }
+
+    .hero-text {
+        font-size: 13px;
+        line-height: 1.4;
+        margin-bottom: 12px;
+    }
+
+    .hero-text:last-of-type {
+        margin-bottom: 16px;
+    }
+
+    .hero-buttons {
+        gap: 15px;
+        flex-direction: row;
+        align-items: center;
+    }
+
+    .hero-btn {
+        padding: 8px 16px;
+        font-size: 13px;
+    }
+}
+
+/* Desktop */
+@media (min-width: 1200px) {
+    .carousel-slides {
+        height: 500px;
+    }
+
+    .carousel-arrow {
+        font-size: 2rem;
+        top: 50%;
+        transform: translateY(-50%);
+    }
+
+    .carousel-arrow:hover {
+        transform: translateY(-50%) scale(1.1);
+    }
+
+    .carousel-arrow:active {
+        transform: translateY(-50%) scale(0.95);
+    }
+
+    .carousel-arrow-left {
+        left: 20px;
+    }
+
+    .carousel-arrow-right {
+        right: 20px;
+    }
+
+    /* Hero card adjustments for desktop */
+    .hero-content {
+        padding: 70px 20px 70px 70px;
+    }
+
+    .hero-heading {
+        font-size: 46px;
+        line-height: 1.2;
+        margin-bottom: 20px;
+    }
+
+    .hero-text {
+        font-size: 16px;
+        line-height: 1.5;
+        margin-bottom: 20px;
+    }
+
+    .hero-text:last-of-type {
+        margin-bottom: 24px;
+    }
+
+    .hero-buttons {
+        gap: 30px;
+        flex-direction: row;
+        align-items: center;
+    }
+
+    .hero-btn {
+        padding: 12px 24px;
+        font-size: 16px;
+    }
+}
+
+/* Empty slide placeholder styling */
+.carousel-slide {
+    background: #FAF6F1;
+}
+
+/* Hero Card Styles - Base Structure */
+.hero-card {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    padding: 0;
+    height: 100%;
+}
+
+.hero-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.hero-heading {
+    font-weight: 700;
+}
+
+.hero-text {
+    color: #212529;
+}
+
+.hero-buttons {
+    display: flex;
+}
+
+.hero-btn {
+    text-decoration: none;
+}
+
+.hero-image {
+    position: relative;
+}
+
+.hero-image img {
+    display: block;
+}

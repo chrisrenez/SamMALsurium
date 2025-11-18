@@ -1,0 +1,23 @@
+// Set Manrope as the default Bootstrap font
+$font-family-sans-serif: 'Manrope', system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+
+// Optional: Update Bootstrap’s base font family
+$font-family-base: $font-family-sans-serif;
+
+// Headings font
+$headings-font-family: 'Fraunces', serif;
+
+// Example: change primary color
+$primary: #B64D3F;
+$primary-dark: #400406;
+$primary-light: #E09990;
+
+
+$secondary: #00AFB5;
+$secondary-dark: #027A7E;
+$secondary-light: #93EBEE;
+
+
+$body-bg: #D9CFC1;
+
+$font-size-base: 1.0rem;

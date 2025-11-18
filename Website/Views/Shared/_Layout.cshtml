@@ -1,0 +1,229 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SamMALsurium - @ViewData["Title"]</title>
+    <script type="importmap"></script>
+    <link rel="stylesheet" href="~/css/bootstrap.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="~/css/shared.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/carousel.css" asp-append-version="true" />
+    @* <link rel="stylesheet" href="~/css/auth.css" asp-append-version="true" /> *@
+</head>
+
+<body>
+    @if (User.Identity?.IsAuthenticated == true)
+    {
+        <script>document.body.setAttribute('data-authenticated', 'true');</script>
+    }
+    <header class="site-header">
+        <div class="container-fluid px-4 py-3">
+            <div class="container-xxl py-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    @if (User.Identity?.IsAuthenticated == true)
+                    {
+                        <a href="/Home/Overview" class="logo-link">
+                            <img src="~/img/brand/logo.png" alt="SamMALsurium" class="logo" />
+                        </a>
+                    }
+                    else
+                    {
+                        <a href="/" class="logo-link">
+                            <img src="~/img/brand/logo.png" alt="SamMALsurium" class="logo" />
+                        </a>
+                    }
+                    <div>
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                            <!-- User menu for authenticated users - visible on tablet and desktop -->
+                            <div class="dropdown d-none d-md-inline-block">
+                                <button class="btn btn-primary" type="button" id="userMenuDropdown"
+                                    data-bs-toggle="dropdown" aria-expanded="false" aria-label="User Menu">
+                                    <i class="bi bi-person-circle" style="font-size: 1.5rem;"></i>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenuDropdown">
+                                    <li><a class="dropdown-item" href="/account/settings">Mein Konto</a></li>
+                                    @if (User.IsInRole("Admin"))
+                                    {
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li><a class="dropdown-item" href="/Admin"><i class="bi bi-gear-fill me-2"></i>Admin</a></li>
+                                    }
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item" href="#" id="logoutLink">Ausloggen</a></li>
+                                </ul>
+                            </div>
+                        }
+                        else
+                        {
+                            <!-- Login button - visible on tablet and desktop -->
+                            <a href="/auth/login" class="btn btn-primary d-none d-md-inline-block mr-5">Login</a>
+                        }
+                        <!-- Menu dropdown - visible only on mobile -->
+                        <div class="dropdown d-md-none">
+                            <button class="btn btn-primary" type="button" id="mobileMenuDropdown"
+                                data-bs-toggle="dropdown" aria-expanded="false" aria-label="Menu">
+                                @if (User.Identity?.IsAuthenticated == true)
+                                {
+                                    <i class="bi bi-person-circle" style="font-size: 1.5rem;"></i>
+                                }
+                                else
+                                {
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor"
+                                        viewBox="0 0 16 16">
+                                        <path fill-rule="evenodd"
+                                            d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5z" />
+                                    </svg>
+                                }
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="mobileMenuDropdown">
+                                @if (User.Identity?.IsAuthenticated == true)
+                                {
+                                    <li><a class="dropdown-item" href="/account/settings">Mein Konto</a></li>
+                                    @if (User.IsInRole("Admin"))
+                                    {
+                                        <li><a class="dropdown-item" href="/Admin"><i class="bi bi-gear-fill me-2"></i>Admin</a></li>
+                                    }
+                                    <li><a class="dropdown-item" href="#" id="logoutLinkMobile">Ausloggen</a></li>
+                                    <li>
+                                        <hr class="dropdown-divider">
+                                    </li>
+                                }
+                                else
+                                {
+                                    <li><a class="dropdown-item" href="/auth/login">Login</a></li>
+                                    <li>
+                                        <hr class="dropdown-divider">
+                                    </li>
+                                }
+                                <li><a class="dropdown-item" href="/Home/Overview">Übersicht</a></li>
+                                <li><a class="dropdown-item" href="/Meetings">Treffen</a></li>
+                                <li><a class="dropdown-item" href="/Paintings">Werke</a></li>
+                                <li><a class="dropdown-item" href="/Academy">Akademie</a></li>
+                                <li><a class="dropdown-item" href="/Forum">Forum</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+
+
+
+
+            </div>
+
+
+            @* <div class="d-flex justify-content-between align-items-center">
+                <a href="/" class="logo-link">
+                    <img src="~/img/brand/logo.png" alt="SamMALsurium" class="logo" />
+                </a>
+                <div>
+                    <!-- Login button - visible on tablet and desktop -->
+                    <a href="/Account/Login" class="btn btn-primary d-none d-md-inline-block mr-5">Login</a>
+                    <!-- Menu dropdown - visible only on mobile -->
+                    <div class="dropdown d-md-none">
+                        <button class="btn btn-primary" type="button" id="mobileMenuDropdown" data-bs-toggle="dropdown"
+                            aria-expanded="false" aria-label="Menu">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor"
+                                viewBox="0 0 16 16">
+                                <path fill-rule="evenodd"
+                                    d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5z" />
+                            </svg>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="mobileMenuDropdown">
+                            <li><a class="dropdown-item" href="/Account/Login">Login</a></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li><a class="dropdown-item" href="/Overview">Übersicht</a></li>
+                            <li><a class="dropdown-item" href="/Meetings">Treffen</a></li>
+                            <li><a class="dropdown-item" href="/Images">Bilder</a></li>
+                            <li><a class="dropdown-item" href="/Forum">Forum</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div> *@
+        </div>
+    </header>
+    <nav class="navigation-bar d-none d-md-block">
+        <div class="container-fluid">
+            <div class="d-flex justify-content-center py-3">
+                <div class="btn-group btn-group-lg" role="group" aria-label="Main navigation">
+                    <a href="Home/Overview" class="btn btn-primary active">Übersicht</a>
+                    <a href="/Meetings" class="btn btn-primary">Treffen</a>
+                    <a href="/Paintings" class="btn btn-primary">Werke</a>
+                    <a href="/Academy" class="btn btn-primary">Akademie</a>
+                    <a href="/Forum" class="btn btn-primary">Forum</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid">
+        @RenderBody()
+    </div>
+    <footer class="site-footer">
+        <div class="container-fluid px-4 py-4">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                <div class="footer-logo">
+                    <img src="~/img/brand/logo_small.png" alt="SamMALsurium" height="50" />
+                </div>
+                <nav class="footer-nav d-flex gap-4 flex-wrap">
+                    <a href="/contact" class="footer-link">Kontakt</a>
+                    <a href="/privacy-policy" class="footer-link">Datenschutzerklärung</a>
+                    <a href="/report-issue" class="footer-link">Einen Fehler melden</a>
+                    <a href="/terms" class="footer-link">Nutzungsbedingungen</a>
+                    <a href="/impressum" class="footer-link">Impressum</a>
+                </nav>
+            </div>
+        </div>
+    </footer>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script type="module" src="~/js/app.js" asp-append-version="true"></script>
+    @if (User.Identity?.IsAuthenticated == true)
+    {
+        <script type="module" src="~/js/utils/session-timeout.js" asp-append-version="true"></script>
+        <script>
+            // Handle logout for both desktop and mobile
+            function handleLogout(event) {
+                event.preventDefault();
+
+                // Get CSRF token
+                const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+
+                fetch('/api/auth/logout', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': token || ''
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Redirect to home page after successful logout
+                        window.location.href = '/';
+                    } else {
+                        console.error('Logout failed:', data.message);
+                        alert('Logout failed. Please try again.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Logout error:', error);
+                    // Redirect anyway in case of error
+                    window.location.href = '/';
+                });
+            }
+
+            // Attach event listeners
+            document.getElementById('logoutLink')?.addEventListener('click', handleLogout);
+            document.getElementById('logoutLinkMobile')?.addEventListener('click', handleLogout);
+        </script>
+    }
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+
+</html>

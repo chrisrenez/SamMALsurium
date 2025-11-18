@@ -1,0 +1,16 @@
+{
+  "name": "sammalsurium-website",
+  "version": "1.0.0",
+  "description": "SamMALsurium Website Client Scripts",
+  "private": true,
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc --watch",
+    "clean": "rm -rf wwwroot/js/*.js wwwroot/js/*.js.map"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.0",
+    "@types/jquery": "^3.5.31",
+    "@types/bootstrap": "^5.2.10"
+  }
+}

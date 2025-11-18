@@ -1,0 +1,17 @@
+{
+  "name": "bootstrapsass",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "sass scss/style.scss ../Website/wwwroot/css/bootstrap.css --style=compressed",
+    "watch": "sass --watch scss/style.scss ../Website/wwwroot/css/boostrap.css --style=expanded"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "bootstrap": "^5.3.8",
+    "sass": "^1.93.3"
+  }
+}

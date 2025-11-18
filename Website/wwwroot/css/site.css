@@ -1,0 +1,47 @@
+/* Site-specific Styles */
+
+/* Header Styling */
+.site-header {
+    background-color: var(--card-bg);
+}
+
+/* Logo */
+.logo {
+    height: 40px;
+    width: auto;
+    min-width: 78px;
+}
+
+.logo-link {
+    text-decoration: none;
+}
+
+/* Content Card - extends shared card-base */
+.content-card {
+    min-height: 200px;
+}
+
+.content-card h2 {
+    margin-bottom: 10px;
+}
+
+/* Responsive adjustments */
+@media (min-width: 768px) {
+    .logo {
+        height: 80px;
+    }
+
+    .content-card h2 {
+        margin-bottom: 25px;
+    }
+}
+
+@media (min-width: 1240px) {
+    .logo {
+        height: 120px;
+    }
+
+    .content-card h2 {
+        margin-bottom: 30px;
+    }
+}

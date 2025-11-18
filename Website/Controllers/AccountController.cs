@@ -151,4 +151,76 @@ public class AccountController : Controller
 
         return RedirectToAction("Index", "Home");
     }
+
+    [HttpGet]
+    [Authorize]
+    public async Task<IActionResult> Profile()
+    {
+        var user = await _userManager.GetUserAsync(User);
+        if (user == null)
+        {
+            return NotFound();
+        }
+
+        var model = new UserProfileViewModel
+        {
+            Email = user.Email ?? string.Empty,
+            FirstName = user.FirstName,
+            LastName = user.LastName
+        };
+
+        return View(model);
+    }
+
+    [HttpPost]
+    [Authorize]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Profile(UserProfileViewModel model)
+    {
+        if (!ModelState.IsValid)
+        {
+            return View(model);
+        }
+
+        var user = await _userManager.GetUserAsync(User);
+        if (user == null)
+        {
+            return NotFound();
+        }
+
+        // Track changes for logging
+        var oldFirstName = user.FirstName;
+        var oldLastName = user.LastName;
+
+        // Update only editable fields (FirstName and LastName)
+        user.FirstName = model.FirstName;
+        user.LastName = model.LastName;
+
+        var result = await _userManager.UpdateAsync(user);
+
+        if (result.Succeeded)
+        {
+            var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "Unknown";
+
+            _logger.LogInformation(
+                "User profile updated. Email: {Email}, UserId: {UserId}, IP: {IpAddress}, Timestamp: {Timestamp}, Changes: FirstName: {OldFirstName} -> {NewFirstName}, LastName: {OldLastName} -> {NewLastName}",
+                user.Email, user.Id, ipAddress, DateTime.UtcNow, oldFirstName, user.FirstName, oldLastName, user.LastName);
+
+            TempData["SuccessMessage"] = "Profile updated successfully";
+            return RedirectToAction(nameof(Profile));
+        }
+
+        // Log profile update failure
+        var failureIpAddress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "Unknown";
+        _logger.LogWarning(
+            "Profile update failed for email: {Email}, IP: {IpAddress}, Timestamp: {Timestamp}, Errors: {Errors}",
+            user.Email, failureIpAddress, DateTime.UtcNow, string.Join(", ", result.Errors.Select(e => e.Description)));
+
+        foreach (var error in result.Errors)
+        {
+            ModelState.AddModelError(string.Empty, error.Description);
+        }
+
+        return View(model);
+    }
 }

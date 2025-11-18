@@ -1,0 +1,40 @@
+@using Microsoft.AspNetCore.Identity
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+
+@if (User.Identity?.IsAuthenticated == true)
+{
+    var user = await UserManager.GetUserAsync(User);
+    var userName = user?.FirstName ?? user?.Email ?? "User";
+
+    <!-- User menu for authenticated users - visible on tablet and desktop -->
+    <div class="dropdown d-none d-md-inline-block">
+        <button class="btn btn-primary" type="button" id="userMenuDropdown"
+            data-bs-toggle="dropdown" aria-expanded="false" aria-label="User Menu">
+            <i class="bi bi-person-circle" style="font-size: 1.5rem;"></i>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenuDropdown">
+            <li><h6 class="dropdown-header">@userName</h6></li>
+            <li><a class="dropdown-item" asp-controller="Account" asp-action="Profile">My Profile</a></li>
+            @if (User.IsInRole("Admin"))
+            {
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" href="/Admin"><i class="bi bi-gear-fill me-2"></i>Admin</a></li>
+            }
+            <li><hr class="dropdown-divider"></li>
+            <li>
+                <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+                    <button type="submit" class="dropdown-item">Logout</button>
+                </form>
+            </li>
+        </ul>
+    </div>
+}
+else
+{
+    <!-- Login and Register buttons - visible on tablet and desktop -->
+    <div class="d-none d-md-inline-block">
+        <a asp-controller="Account" asp-action="Login" class="btn btn-outline-primary me-2">Login</a>
+        <a asp-controller="Account" asp-action="Register" class="btn btn-primary">Register</a>
+    </div>
+}

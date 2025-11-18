@@ -36,31 +36,8 @@
                         </a>
                     }
                     <div>
-                        @if (User.Identity?.IsAuthenticated == true)
-                        {
-                            <!-- User menu for authenticated users - visible on tablet and desktop -->
-                            <div class="dropdown d-none d-md-inline-block">
-                                <button class="btn btn-primary" type="button" id="userMenuDropdown"
-                                    data-bs-toggle="dropdown" aria-expanded="false" aria-label="User Menu">
-                                    <i class="bi bi-person-circle" style="font-size: 1.5rem;"></i>
-                                </button>
-                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenuDropdown">
-                                    <li><a class="dropdown-item" href="/account/settings">Mein Konto</a></li>
-                                    @if (User.IsInRole("Admin"))
-                                    {
-                                        <li><hr class="dropdown-divider"></li>
-                                        <li><a class="dropdown-item" href="/Admin"><i class="bi bi-gear-fill me-2"></i>Admin</a></li>
-                                    }
-                                    <li><hr class="dropdown-divider"></li>
-                                    <li><a class="dropdown-item" href="#" id="logoutLink">Ausloggen</a></li>
-                                </ul>
-                            </div>
-                        }
-                        else
-                        {
-                            <!-- Login button - visible on tablet and desktop -->
-                            <a href="/auth/login" class="btn btn-primary d-none d-md-inline-block mr-5">Login</a>
-                        }
+                        <!-- Authentication UI for tablet and desktop -->
+                        <partial name="_LoginPartial" />
                         <!-- Menu dropdown - visible only on mobile -->
                         <div class="dropdown d-md-none">
                             <button class="btn btn-primary" type="button" id="mobileMenuDropdown"
@@ -81,19 +58,24 @@
                             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="mobileMenuDropdown">
                                 @if (User.Identity?.IsAuthenticated == true)
                                 {
-                                    <li><a class="dropdown-item" href="/account/settings">Mein Konto</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Account" asp-action="Profile">My Profile</a></li>
                                     @if (User.IsInRole("Admin"))
                                     {
                                         <li><a class="dropdown-item" href="/Admin"><i class="bi bi-gear-fill me-2"></i>Admin</a></li>
                                     }
-                                    <li><a class="dropdown-item" href="#" id="logoutLinkMobile">Ausloggen</a></li>
+                                    <li>
+                                        <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+                                            <button type="submit" class="dropdown-item">Logout</button>
+                                        </form>
+                                    </li>
                                     <li>
                                         <hr class="dropdown-divider">
                                     </li>
                                 }
                                 else
                                 {
-                                    <li><a class="dropdown-item" href="/auth/login">Login</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Account" asp-action="Login">Login</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Account" asp-action="Register">Register</a></li>
                                     <li>
                                         <hr class="dropdown-divider">
                                     </li>
@@ -186,42 +168,6 @@
     @if (User.Identity?.IsAuthenticated == true)
     {
         <script type="module" src="~/js/utils/session-timeout.js" asp-append-version="true"></script>
-        <script>
-            // Handle logout for both desktop and mobile
-            function handleLogout(event) {
-                event.preventDefault();
-
-                // Get CSRF token
-                const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
-
-                fetch('/api/auth/logout', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': token || ''
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        // Redirect to home page after successful logout
-                        window.location.href = '/';
-                    } else {
-                        console.error('Logout failed:', data.message);
-                        alert('Logout failed. Please try again.');
-                    }
-                })
-                .catch(error => {
-                    console.error('Logout error:', error);
-                    // Redirect anyway in case of error
-                    window.location.href = '/';
-                });
-            }
-
-            // Attach event listeners
-            document.getElementById('logoutLink')?.addEventListener('click', handleLogout);
-            document.getElementById('logoutLinkMobile')?.addEventListener('click', handleLogout);
-        </script>
     }
     @await RenderSectionAsync("Scripts", required: false)
 </body>

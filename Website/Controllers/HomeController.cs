@@ -1,8 +1,8 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using src.Models;
+using SamMALsurium.Models;
 
-namespace src.Controllers;
+namespace SamMALsurium.Controllers;
 
 public class HomeController : Controller
 {

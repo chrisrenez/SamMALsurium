@@ -1,4 +1,4 @@
-namespace src.Models;
+namespace SamMALsurium.Models;
 
 public class ErrorViewModel
 {

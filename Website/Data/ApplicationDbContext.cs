@@ -32,7 +32,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             .HasOne(a => a.TargetUser)
             .WithMany()
             .HasForeignKey(a => a.TargetUserId)
-            .OnDelete(DeleteBehavior.Restrict);
+            .OnDelete(DeleteBehavior.SetNull);
 
         // Seed roles
         var adminRoleId = "1";

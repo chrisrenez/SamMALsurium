@@ -1,3 +1,5 @@
+using System.Text;
+using System.Text.RegularExpressions;
 using MailKit.Net.Smtp;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Abstractions;
@@ -15,6 +17,7 @@ namespace SamMALsurium.Services;
 public class EmailService : IEmailService
 {
     private readonly EmailSettings _emailSettings;
+    private readonly ApplicationSettings _applicationSettings;
     private readonly ILogger<EmailService> _logger;
     private readonly IRazorViewEngine _razorViewEngine;
     private readonly ITempDataProvider _tempDataProvider;
@@ -22,12 +25,14 @@ public class EmailService : IEmailService
 
     public EmailService(
         IOptions<EmailSettings> emailSettings,
+        IOptions<ApplicationSettings> applicationSettings,
         ILogger<EmailService> logger,
         IRazorViewEngine razorViewEngine,
         ITempDataProvider tempDataProvider,
         IServiceProvider serviceProvider)
     {
         _emailSettings = emailSettings.Value;
+        _applicationSettings = applicationSettings.Value;
         _logger = logger;
         _razorViewEngine = razorViewEngine;
         _tempDataProvider = tempDataProvider;
@@ -75,7 +80,8 @@ public class EmailService : IEmailService
         {
             UserFirstName = userFirstName,
             PasswordResetToken = passwordResetToken,
-            UserId = userId
+            UserId = userId,
+            BaseUrl = _applicationSettings.BaseUrl
         };
 
         var htmlBody = await RenderViewToStringAsync("~/Views/Emails/SetPasswordEmail.cshtml", model);
@@ -91,7 +97,8 @@ public class EmailService : IEmailService
     {
         var model = new
         {
-            UserFirstName = userFirstName
+            UserFirstName = userFirstName,
+            BaseUrl = _applicationSettings.BaseUrl
         };
 
         var htmlBody = await RenderViewToStringAsync("~/Views/Emails/AccountReactivated.cshtml", model);
@@ -105,19 +112,20 @@ public class EmailService : IEmailService
 
     private async Task SendEmailAsync(string toEmail, string subject, string htmlBody)
     {
+        var message = new MimeMessage();
+        message.From.Add(new MailboxAddress(_emailSettings.FromName, _emailSettings.FromEmail));
+        message.To.Add(new MailboxAddress("", toEmail));
+        message.Subject = subject;
+
+        var bodyBuilder = new BodyBuilder
+        {
+            HtmlBody = htmlBody,
+            TextBody = ConvertHtmlToPlainText(htmlBody)
+        };
+        message.Body = bodyBuilder.ToMessageBody();
+
         try
         {
-            var message = new MimeMessage();
-            message.From.Add(new MailboxAddress(_emailSettings.FromName, _emailSettings.FromEmail));
-            message.To.Add(new MailboxAddress("", toEmail));
-            message.Subject = subject;
-
-            var bodyBuilder = new BodyBuilder
-            {
-                HtmlBody = htmlBody
-            };
-            message.Body = bodyBuilder.ToMessageBody();
-
             using var client = new SmtpClient();
             await client.ConnectAsync(_emailSettings.Host, _emailSettings.Port, MailKit.Security.SecureSocketOptions.StartTls);
             await client.AuthenticateAsync(_emailSettings.Username, _emailSettings.Password);
@@ -129,8 +137,151 @@ public class EmailService : IEmailService
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to send email to {ToEmail} with subject '{Subject}'", toEmail, subject);
+
+            if (_emailSettings.SaveEmailsToFileOnFailure)
+            {
+                await SaveEmailToFileAsync(message);
+            }
+            else
+            {
+                throw;
+            }
+        }
+    }
+
+    private async Task SaveEmailToFileAsync(MimeMessage message)
+    {
+        try
+        {
+            var saveDirectory = Path.Combine(Directory.GetCurrentDirectory(), "SavedEmails");
+            Directory.CreateDirectory(saveDirectory);
+
+            var timestamp = DateTime.Now.ToString("yyyy-MM-dd_HHmmss");
+            var recipient = message.To.Mailboxes.FirstOrDefault()?.Address ?? "unknown";
+            var sanitizedSubject = SanitizeFileName(message.Subject);
+            var baseFileName = $"{timestamp}_{recipient}_{sanitizedSubject}";
+
+            var htmlFilePath = Path.Combine(saveDirectory, $"{baseFileName}.html");
+            var textFilePath = Path.Combine(saveDirectory, $"{baseFileName}.txt");
+
+            var metadata = BuildEmailMetadata(message);
+
+            var htmlContent = new StringBuilder();
+            htmlContent.AppendLine("<!--");
+            htmlContent.AppendLine(metadata);
+            htmlContent.AppendLine("-->");
+            htmlContent.AppendLine();
+            htmlContent.AppendLine(GetHtmlBody(message));
+
+            await File.WriteAllTextAsync(htmlFilePath, htmlContent.ToString());
+
+            var textContent = new StringBuilder();
+            textContent.AppendLine(metadata);
+            textContent.AppendLine();
+            textContent.AppendLine(new string('=', 80));
+            textContent.AppendLine();
+            textContent.AppendLine(GetTextBody(message));
+
+            await File.WriteAllTextAsync(textFilePath, textContent.ToString());
+
+            _logger.LogInformation(
+                "Email saved to filesystem: {HtmlPath} and {TextPath}",
+                htmlFilePath,
+                textFilePath
+            );
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to save email to filesystem");
             throw;
         }
+    }
+
+    private string BuildEmailMetadata(MimeMessage message)
+    {
+        var metadata = new StringBuilder();
+        metadata.AppendLine("EMAIL METADATA");
+        metadata.AppendLine(new string('=', 80));
+        metadata.AppendLine($"Date: {message.Date:yyyy-MM-dd HH:mm:ss}");
+        metadata.AppendLine($"From: {message.From}");
+        metadata.AppendLine($"To: {message.To}");
+        metadata.AppendLine($"Subject: {message.Subject}");
+        metadata.AppendLine(new string('=', 80));
+        return metadata.ToString();
+    }
+
+    private string SanitizeFileName(string fileName)
+    {
+        if (string.IsNullOrWhiteSpace(fileName))
+        {
+            return "No-Subject";
+        }
+
+        var invalidChars = Path.GetInvalidFileNameChars();
+        var sanitized = string.Join("", fileName.Select(c =>
+            invalidChars.Contains(c) ? '-' : c
+        ));
+
+        sanitized = Regex.Replace(sanitized, @"\s+", "-");
+        sanitized = Regex.Replace(sanitized, @"-+", "-");
+        sanitized = sanitized.Trim('-');
+
+        if (sanitized.Length > 50)
+        {
+            sanitized = sanitized.Substring(0, 50).TrimEnd('-');
+        }
+
+        return string.IsNullOrWhiteSpace(sanitized) ? "No-Subject" : sanitized;
+    }
+
+    private string GetHtmlBody(MimeMessage message)
+    {
+        if (message.Body is Multipart multipart)
+        {
+            var htmlPart = multipart.OfType<TextPart>().FirstOrDefault(p => p.ContentType.MimeType == "text/html");
+            return htmlPart?.Text ?? string.Empty;
+        }
+
+        if (message.Body is TextPart htmlTextPart && htmlTextPart.ContentType.MimeType == "text/html")
+        {
+            return htmlTextPart.Text;
+        }
+
+        return string.Empty;
+    }
+
+    private string GetTextBody(MimeMessage message)
+    {
+        if (message.Body is Multipart multipart)
+        {
+            var textPart = multipart.OfType<TextPart>().FirstOrDefault(p => p.ContentType.MimeType == "text/plain");
+            return textPart?.Text ?? string.Empty;
+        }
+
+        if (message.Body is TextPart plainTextPart && plainTextPart.ContentType.MimeType == "text/plain")
+        {
+            return plainTextPart.Text;
+        }
+
+        return string.Empty;
+    }
+
+    private string ConvertHtmlToPlainText(string html)
+    {
+        if (string.IsNullOrWhiteSpace(html))
+        {
+            return string.Empty;
+        }
+
+        var text = Regex.Replace(html, @"<br\s*/?>", "\n", RegexOptions.IgnoreCase);
+        text = Regex.Replace(text, @"</p>", "\n\n", RegexOptions.IgnoreCase);
+        text = Regex.Replace(text, @"</div>", "\n", RegexOptions.IgnoreCase);
+        text = Regex.Replace(text, @"<[^>]+>", string.Empty);
+        text = System.Net.WebUtility.HtmlDecode(text);
+        text = Regex.Replace(text, @"^\s+", string.Empty, RegexOptions.Multiline);
+        text = Regex.Replace(text, @"\n{3,}", "\n\n");
+
+        return text.Trim();
     }
 
     private async Task<string> RenderViewToStringAsync(string viewPath, object model)

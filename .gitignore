@@ -416,3 +416,6 @@ Website/wwwroot/js/*.js.map
 
 Website/wwwroot/img/hero/placeholders/
 Website/wwwroot/img/placeholders/
+
+# Saved emails for development/testing
+Website/SavedEmails/

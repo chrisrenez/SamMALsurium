@@ -37,6 +37,9 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 .AddEntityFrameworkStores<ApplicationDbContext>()
 .AddDefaultTokenProviders();
 
+// Configure application settings
+builder.Services.Configure<ApplicationSettings>(builder.Configuration.GetSection("ApplicationSettings"));
+
 // Configure email settings
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
 

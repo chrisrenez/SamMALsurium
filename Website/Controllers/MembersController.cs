@@ -7,7 +7,7 @@ using SamMALsurium.Models.Enums;
 using SamMALsurium.Models.ViewModels.Admin;
 using SamMALsurium.Services;
 
-namespace SamMALsurium.Areas.Admin.Controllers;
+namespace SamMALsurium.Controllers;
 
 public class MembersController : BaseAdminController
 {

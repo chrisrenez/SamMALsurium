@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using SamMALsurium.Data;
 using SamMALsurium.Models.ViewModels.Admin;
 
-namespace SamMALsurium.Areas.Admin.Controllers;
+namespace SamMALsurium.Controllers;
 
 public class DashboardController : BaseAdminController
 {
@@ -21,7 +21,7 @@ public class DashboardController : BaseAdminController
         _environment = environment;
     }
 
-    // GET: Admin/Dashboard
+    // GET: /Dashboard
     public async Task<IActionResult> Index()
     {
         var viewModel = new DashboardViewModel();

@@ -1,9 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace SamMALsurium.Areas.Admin.Controllers;
+namespace SamMALsurium.Controllers;
 
-[Area("Admin")]
 [Authorize(Roles = "Admin")]
 public abstract class BaseAdminController : Controller
 {

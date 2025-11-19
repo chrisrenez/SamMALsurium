@@ -217,6 +217,70 @@ public class AccountController : Controller
     }
 
     [HttpGet]
+    [AllowAnonymous]
+    public IActionResult ResetPassword(string? userId = null, string? code = null)
+    {
+        if (string.IsNullOrWhiteSpace(userId) || string.IsNullOrWhiteSpace(code))
+        {
+            TempData["ErrorMessage"] = "Invalid password reset link.";
+            return RedirectToAction(nameof(Login));
+        }
+
+        var model = new ResetPasswordViewModel
+        {
+            UserId = userId,
+            Code = code
+        };
+
+        return View(model);
+    }
+
+    [HttpPost]
+    [AllowAnonymous]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ResetPassword(ResetPasswordViewModel model)
+    {
+        if (!ModelState.IsValid)
+        {
+            return View(model);
+        }
+
+        var user = await _userManager.FindByIdAsync(model.UserId);
+        if (user == null)
+        {
+            // Don't reveal that the user does not exist
+            TempData["SuccessMessage"] = "Your password has been reset successfully. You can now log in with your new password.";
+            return RedirectToAction(nameof(Login));
+        }
+
+        var result = await _userManager.ResetPasswordAsync(user, model.Code, model.Password);
+        if (result.Succeeded)
+        {
+            // Log password reset
+            var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "Unknown";
+            _logger.LogInformation(
+                "Password reset successfully. Email: {Email}, UserId: {UserId}, IP: {IpAddress}, Timestamp: {Timestamp}",
+                user.Email, user.Id, ipAddress, DateTime.UtcNow);
+
+            TempData["SuccessMessage"] = "Your password has been reset successfully. You can now log in with your new password.";
+            return RedirectToAction(nameof(Login));
+        }
+
+        // Log password reset failure
+        var failureIpAddress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "Unknown";
+        _logger.LogWarning(
+            "Password reset failed. UserId: {UserId}, IP: {IpAddress}, Timestamp: {Timestamp}, Errors: {Errors}",
+            model.UserId, failureIpAddress, DateTime.UtcNow, string.Join(", ", result.Errors.Select(e => e.Description)));
+
+        foreach (var error in result.Errors)
+        {
+            ModelState.AddModelError(string.Empty, error.Description);
+        }
+
+        return View(model);
+    }
+
+    [HttpGet]
     [Authorize]
     public async Task<IActionResult> Profile()
     {

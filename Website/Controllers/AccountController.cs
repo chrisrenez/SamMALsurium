@@ -2,7 +2,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using SamMALsurium.Models;
+using SamMALsurium.Models.Enums;
 using SamMALsurium.Models.ViewModels;
+using SamMALsurium.Services;
 
 namespace SamMALsurium.Controllers;
 
@@ -12,17 +14,20 @@ public class AccountController : Controller
     private readonly SignInManager<ApplicationUser> _signInManager;
     private readonly ILogger<AccountController> _logger;
     private readonly IConfiguration _configuration;
+    private readonly IEmailService _emailService;
 
     public AccountController(
         UserManager<ApplicationUser> userManager,
         SignInManager<ApplicationUser> signInManager,
         ILogger<AccountController> logger,
-        IConfiguration configuration)
+        IConfiguration configuration,
+        IEmailService emailService)
     {
         _userManager = userManager;
         _signInManager = signInManager;
         _logger = logger;
         _configuration = configuration;
+        _emailService = emailService;
     }
 
     [HttpGet]
@@ -47,7 +52,9 @@ public class AccountController : Controller
             UserName = model.Email,
             Email = model.Email,
             FirstName = model.FirstName,
-            LastName = model.LastName
+            LastName = model.LastName,
+            IsApproved = false,
+            AccountStatus = AccountStatus.Active
         };
 
         var result = await _userManager.CreateAsync(user, model.Password);
@@ -62,6 +69,34 @@ public class AccountController : Controller
             _logger.LogInformation(
                 "User registered successfully. Email: {Email}, UserId: {UserId}, IP: {IpAddress}, Timestamp: {Timestamp}",
                 user.Email, user.Id, ipAddress, DateTime.UtcNow);
+
+            // Send notification to admin about new user registration
+            try
+            {
+                // Get admin user email (query first admin user)
+                var adminUsers = await _userManager.GetUsersInRoleAsync("Admin");
+                var adminUser = adminUsers.FirstOrDefault();
+
+                if (adminUser != null && !string.IsNullOrEmpty(adminUser.Email))
+                {
+                    await _emailService.SendAdminNewUserNotificationAsync(
+                        adminUser.Email,
+                        user.FirstName,
+                        user.LastName,
+                        user.Email!);
+
+                    _logger.LogInformation(
+                        "Admin notification email sent for new user registration. NewUserEmail: {NewUserEmail}, AdminEmail: {AdminEmail}",
+                        user.Email, adminUser.Email);
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log error but don't block registration if email fails
+                _logger.LogError(ex,
+                    "Failed to send admin notification email for new user registration. NewUserEmail: {NewUserEmail}",
+                    user.Email);
+            }
 
             return RedirectToAction(nameof(Login));
         }
@@ -100,6 +135,36 @@ public class AccountController : Controller
             return View(model);
         }
 
+        // Find user first to check approval and account status
+        var user = await _userManager.FindByEmailAsync(model.Email);
+
+        if (user != null)
+        {
+            // Check if user is approved
+            if (!user.IsApproved)
+            {
+                var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "Unknown";
+                _logger.LogWarning(
+                    "Login attempt by unapproved user. Email: {Email}, IP: {IpAddress}, Timestamp: {Timestamp}",
+                    model.Email, ipAddress, DateTime.UtcNow);
+
+                ModelState.AddModelError(string.Empty, "Your account is pending approval by an administrator. You will receive an email once approved.");
+                return View(model);
+            }
+
+            // Check if user is suspended
+            if (user.AccountStatus == AccountStatus.Suspended)
+            {
+                var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "Unknown";
+                _logger.LogWarning(
+                    "Login attempt by suspended user. Email: {Email}, UserId: {UserId}, IP: {IpAddress}, Timestamp: {Timestamp}",
+                    model.Email, user.Id, ipAddress, DateTime.UtcNow);
+
+                ModelState.AddModelError(string.Empty, "Your account has been suspended.");
+                return View(model);
+            }
+        }
+
         var result = await _signInManager.PasswordSignInAsync(
             model.Email,
             model.Password,
@@ -108,7 +173,6 @@ public class AccountController : Controller
 
         if (result.Succeeded)
         {
-            var user = await _userManager.FindByEmailAsync(model.Email);
             var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "Unknown";
 
             _logger.LogInformation(

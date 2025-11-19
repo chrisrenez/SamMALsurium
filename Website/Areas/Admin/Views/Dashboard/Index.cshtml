@@ -1,0 +1,301 @@
+@model DashboardViewModel
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<div class="container-fluid mt-4">
+    <h1 class="h3 mb-4">Admin Dashboard</h1>
+
+    <!-- Quick Actions -->
+    <div class="quick-actions mb-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title mb-3">
+                    <i class="bi bi-lightning"></i> Schnellaktionen
+                </h5>
+                <div class="d-flex flex-wrap gap-2">
+                    <a asp-controller="Members" asp-action="Create" class="btn btn-primary">
+                        <i class="bi bi-person-plus"></i> Mitglied hinzufügen
+                    </a>
+                    <a asp-controller="Members" asp-action="PendingApprovals" class="btn btn-warning position-relative">
+                        <i class="bi bi-clock-history"></i> Wartende Genehmigungen
+                        @if (Model.Users.PendingApprovals > 0)
+                        {
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger pending-badge">
+                                @Model.Users.PendingApprovals
+                                <span class="visually-hidden">pending approvals</span>
+                            </span>
+                        }
+                    </a>
+                    <a asp-controller="Members" asp-action="Index" class="btn btn-outline-primary">
+                        <i class="bi bi-people"></i> Alle Mitglieder
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Metrics -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h5 class="mb-3">Benutzerstatistiken</h5>
+        </div>
+        <div class="col-md-6 col-lg-3 mb-3">
+            <div class="card stat-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-muted mb-1">Gesamte Mitglieder</p>
+                            <h3 class="mb-0">@Model.Users.TotalMembers</h3>
+                        </div>
+                        <div class="stat-icon bg-primary">
+                            <i class="bi bi-people"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3 mb-3">
+            <div class="card stat-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-muted mb-1">Wartende Genehmigungen</p>
+                            <h3 class="mb-0">@Model.Users.PendingApprovals</h3>
+                        </div>
+                        <div class="stat-icon bg-warning">
+                            <i class="bi bi-clock-history"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3 mb-3">
+            <div class="card stat-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-muted mb-1">Neue diesen Monat</p>
+                            <h3 class="mb-0">@Model.Users.NewThisMonth</h3>
+                        </div>
+                        <div class="stat-icon bg-success">
+                            <i class="bi bi-person-plus"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3 mb-3">
+            <div class="card stat-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-muted mb-1">Aktive Benutzer</p>
+                            <h3 class="mb-0">@Model.Users.ActiveUsers</h3>
+                        </div>
+                        <div class="stat-icon bg-info">
+                            <i class="bi bi-activity"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Content Metrics -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h5 class="mb-3">Inhaltsstatistiken</h5>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card stat-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-muted mb-1">Kunstwerke</p>
+                            <h3 class="mb-0">@Model.Content.TotalArtworks</h3>
+                        </div>
+                        <div class="stat-icon bg-purple">
+                            <i class="bi bi-palette"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card stat-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-muted mb-1">Veranstaltungen</p>
+                            <h3 class="mb-0">@Model.Content.TotalEvents</h3>
+                        </div>
+                        <div class="stat-icon bg-orange">
+                            <i class="bi bi-calendar-event"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card stat-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-muted mb-1">Umfragen</p>
+                            <h3 class="mb-0">@Model.Content.TotalSurveys</h3>
+                        </div>
+                        <div class="stat-icon bg-teal">
+                            <i class="bi bi-list-check"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- System Health and Recent Activity -->
+    <div class="row mb-4">
+        <div class="col-lg-6 mb-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">
+                        <i class="bi bi-heart-pulse"></i> Systemgesundheit
+                    </h5>
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="text-muted">Datenbankstatus:</span>
+                            @if (Model.SystemHealth.DatabaseStatus == "Connected")
+                            {
+                                <span class="badge bg-success">
+                                    <i class="bi bi-check-circle"></i> Verbunden
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-danger">
+                                    <i class="bi bi-x-circle"></i> Getrennt
+                                </span>
+                            }
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="text-muted">Speichernutzung:</span>
+                            <span>@Model.SystemHealth.StorageUsedFormatted</span>
+                        </div>
+                        <div class="progress" style="height: 8px;">
+                            <div class="progress-bar @(Model.SystemHealth.StorageUsedPercentage > 80 ? "bg-danger" : Model.SystemHealth.StorageUsedPercentage > 60 ? "bg-warning" : "bg-success")"
+                                 role="progressbar"
+                                 style="width: @Model.SystemHealth.StorageUsedPercentage%"
+                                 aria-valuenow="@Model.SystemHealth.StorageUsedPercentage"
+                                 aria-valuemin="0"
+                                 aria-valuemax="100"></div>
+                        </div>
+                        <small class="text-muted">@Model.SystemHealth.StorageAvailableFormatted verfügbar</small>
+                    </div>
+                    <div class="mb-2">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="text-muted">Aktuelle Fehler (24h):</span>
+                            <span class="badge @(Model.SystemHealth.RecentErrors > 0 ? "bg-danger" : "bg-success")">
+                                @Model.SystemHealth.RecentErrors
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6 mb-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">
+                        <i class="bi bi-clock-history"></i> Letzte Aktivitäten
+                    </h5>
+                    @if (Model.Content.RecentActivity.Any())
+                    {
+                        <div class="activity-list">
+                            @foreach (var activity in Model.Content.RecentActivity)
+                            {
+                                <div class="activity-item mb-3 pb-3 border-bottom">
+                                    <div class="d-flex justify-content-between">
+                                        <strong>@activity.Action</strong>
+                                        <small class="text-muted">@activity.Timestamp.ToString("dd.MM.yyyy HH:mm")</small>
+                                    </div>
+                                    @if (!string.IsNullOrWhiteSpace(activity.Details))
+                                    {
+                                        <small class="text-muted d-block">@activity.Details</small>
+                                    }
+                                    <small class="text-muted">von @activity.AdminName</small>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted">Keine aktuellen Aktivitäten vorhanden.</p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .stat-card {
+        border-left: 4px solid var(--admin-accent);
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    .stat-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 24px;
+    }
+
+    .bg-purple {
+        background-color: #6f42c1;
+    }
+
+    .bg-orange {
+        background-color: #fd7e14;
+    }
+
+    .bg-teal {
+        background-color: #20c997;
+    }
+
+    .pending-badge {
+        animation: pulse 2s infinite;
+    }
+
+    @@keyframes pulse {
+        0%, 100% {
+            opacity: 1;
+        }
+        50% {
+            opacity: 0.7;
+        }
+    }
+
+    .activity-item:last-child {
+        border-bottom: none !important;
+        margin-bottom: 0 !important;
+        padding-bottom: 0 !important;
+    }
+
+    .activity-list {
+        max-height: 400px;
+        overflow-y: auto;
+    }
+</style>

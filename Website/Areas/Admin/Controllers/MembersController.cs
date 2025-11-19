@@ -134,7 +134,8 @@ public class MembersController : BaseAdminController
         };
 
         // Generate a temporary password (will be reset via email)
-        var tempPassword = Guid.NewGuid().ToString();
+        // Must meet password requirements: 12+ chars, uppercase, lowercase, digit, non-alphanumeric
+        var tempPassword = $"TempPass-{Guid.NewGuid()}!";
         var createResult = await _userManager.CreateAsync(user, tempPassword);
 
         if (!createResult.Succeeded)

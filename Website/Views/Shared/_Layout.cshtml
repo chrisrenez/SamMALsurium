@@ -61,7 +61,7 @@
                                     <li><a class="dropdown-item" asp-controller="Account" asp-action="Profile">My Profile</a></li>
                                     @if (User.IsInRole("Admin"))
                                     {
-                                        <li><a class="dropdown-item" href="/Admin"><i class="bi bi-gear-fill me-2"></i>Admin</a></li>
+                                        <li><a class="dropdown-item" href="/Dashboard/Index"><i class="bi bi-gear-fill me-2"></i>Admin</a></li>
                                     }
                                     <li>
                                         <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">

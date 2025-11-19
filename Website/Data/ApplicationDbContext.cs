@@ -15,9 +15,24 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
         _configuration = configuration;
     }
 
+    public DbSet<AdminAuditLog> AdminAuditLogs { get; set; }
+
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
+
+        // Configure AdminAuditLog relationships
+        builder.Entity<AdminAuditLog>()
+            .HasOne(a => a.AdminUser)
+            .WithMany()
+            .HasForeignKey(a => a.AdminUserId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.Entity<AdminAuditLog>()
+            .HasOne(a => a.TargetUser)
+            .WithMany()
+            .HasForeignKey(a => a.TargetUserId)
+            .OnDelete(DeleteBehavior.Restrict);
 
         // Seed roles
         var adminRoleId = "1";
@@ -60,7 +75,9 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             FirstName = adminFirstName,
             LastName = adminLastName,
             SecurityStamp = "admin-seed-security-stamp",
-            PasswordHash = adminPasswordHash
+            PasswordHash = adminPasswordHash,
+            IsApproved = true,
+            AccountStatus = Models.Enums.AccountStatus.Active
         });
 
         // Assign admin user to Admin role

@@ -59,6 +59,7 @@ builder.Services.AddHostedService<ImageProcessingBackgroundService>();
 // Register poll services
 builder.Services.AddScoped<SamMALsurium.Services.Polls.IPollService, SamMALsurium.Services.Polls.PollService>();
 builder.Services.AddScoped<SamMALsurium.Services.Polls.IVoteService, SamMALsurium.Services.Polls.VoteService>();
+builder.Services.AddHostedService<PollLifecycleBackgroundService>();
 
 var app = builder.Build();
 

@@ -10,11 +10,13 @@ public class PollService : IPollService
 {
     private readonly ApplicationDbContext _context;
     private readonly ILogger<PollService> _logger;
+    private readonly IEmailService _emailService;
 
-    public PollService(ApplicationDbContext context, ILogger<PollService> logger)
+    public PollService(ApplicationDbContext context, ILogger<PollService> logger, IEmailService emailService)
     {
         _context = context;
         _logger = logger;
+        _emailService = emailService;
     }
 
     public async Task<Poll> CreatePollAsync(Poll poll)
@@ -55,7 +57,56 @@ public class PollService : IPollService
 
         _logger.LogInformation("Poll created with ID {PollId} by user {UserId}", poll.Id, poll.CreatedById);
 
+        // Send notifications to users with poll notifications enabled
+        await SendPollCreatedNotificationsAsync(poll);
+
         return poll;
+    }
+
+    private async Task SendPollCreatedNotificationsAsync(Poll poll)
+    {
+        try
+        {
+            // Reload poll with navigation properties
+            var pollWithDetails = await _context.Polls
+                .Include(p => p.Event)
+                .Include(p => p.CreatedBy)
+                .FirstOrDefaultAsync(p => p.Id == poll.Id);
+
+            if (pollWithDetails == null)
+            {
+                return;
+            }
+
+            // Get users who have poll notifications enabled and are active
+            var recipients = await _context.Users
+                .Where(u => u.EnablePollNotifications && u.AccountStatus == AccountStatus.Active)
+                .ToListAsync();
+
+            foreach (var user in recipients)
+            {
+                try
+                {
+                    await _emailService.SendPollCreatedNotificationAsync(
+                        user.Email!,
+                        user.UserName!,
+                        pollWithDetails.Title,
+                        pollWithDetails.Description,
+                        pollWithDetails.Event?.Title,
+                        $"/Poll/Details/{pollWithDetails.Id}");
+
+                    _logger.LogInformation("Sent poll created notification for poll {PollId} to {Email}", pollWithDetails.Id, user.Email);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error sending poll created notification to {Email}", user.Email);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error sending poll created notifications for poll {PollId}", poll.Id);
+        }
     }
 
     public async Task<Poll?> GetPollByIdAsync(int pollId)

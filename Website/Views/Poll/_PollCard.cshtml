@@ -1,0 +1,126 @@
+@model SamMALsurium.Models.Poll
+@using SamMALsurium.Models.Enums
+@inject SamMALsurium.Services.Polls.IVoteService VoteService
+@inject SamMALsurium.Services.Polls.IPollService PollService
+@inject Microsoft.AspNetCore.Identity.UserManager<SamMALsurium.Models.ApplicationUser> UserManager
+
+@{
+    var user = await UserManager.GetUserAsync(User);
+    var hasVoted = user != null && await VoteService.HasUserVotedAsync(Model.Id, user.Id);
+    var voteCount = await PollService.GetVoteCountAsync(Model.Id);
+    var now = DateTime.UtcNow;
+    var isClosingSoon = Model.EndDate.HasValue && Model.EndDate.Value > now && Model.EndDate.Value <= now.AddHours(24);
+    var isActive = Model.Status == PollStatus.Active;
+    var canVote = isActive && (!Model.StartDate.HasValue || Model.StartDate.Value <= now) && (!Model.EndDate.HasValue || Model.EndDate.Value > now);
+}
+
+<div class="card poll-card mb-3">
+    <div class="card-body">
+        <div class="d-flex justify-content-between align-items-start mb-2">
+            <h5 class="card-title mb-0">@Model.Title</h5>
+            <div class="d-flex gap-2 flex-wrap">
+                @if (Model.Status == PollStatus.Active)
+                {
+                    <span class="badge bg-success">Aktiv</span>
+                }
+                else if (Model.Status == PollStatus.Closed)
+                {
+                    <span class="badge bg-secondary">Geschlossen</span>
+                }
+                else if (Model.Status == PollStatus.Archived)
+                {
+                    <span class="badge bg-dark">Archiviert</span>
+                }
+
+                @if (isClosingSoon && isActive)
+                {
+                    <span class="badge bg-warning text-dark">Endet bald</span>
+                }
+
+                @if (hasVoted)
+                {
+                    <span class="badge bg-info">Sie haben abgestimmt</span>
+                }
+            </div>
+        </div>
+
+        @if (!string.IsNullOrEmpty(Model.Description))
+        {
+            <p class="card-text text-muted small">@Model.Description</p>
+        }
+
+        <div class="row mt-3">
+            <div class="col-6 col-md-3">
+                <small class="text-muted">Typ:</small><br>
+                <strong>
+                    @switch (Model.Type)
+                    {
+                        case PollType.MultipleChoice:
+                            <span>Multiple Choice</span>
+                            break;
+                        case PollType.RankedChoice:
+                            <span>Rangfolge</span>
+                            break;
+                        case PollType.ScoreVoting:
+                            <span>Bewertung</span>
+                            break;
+                        case PollType.AvailabilityGrid:
+                            <span>Verfügbarkeit</span>
+                            break;
+                    }
+                </strong>
+            </div>
+
+            <div class="col-6 col-md-3">
+                <small class="text-muted">Stimmen:</small><br>
+                <strong>@voteCount</strong>
+            </div>
+
+            @if (Model.EndDate.HasValue)
+            {
+                <div class="col-12 col-md-6 mt-2 mt-md-0">
+                    <small class="text-muted">Endet am:</small><br>
+                    <strong>@Model.EndDate.Value.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</strong>
+                </div>
+            }
+        </div>
+
+        <div class="mt-3 d-flex gap-2 flex-wrap">
+            @if (canVote && !hasVoted)
+            {
+                <a href="@Url.Action("Details", "Poll", new { id = Model.Id })" class="btn btn-primary btn-sm">
+                    Jetzt abstimmen
+                </a>
+            }
+            else if (hasVoted && Model.AllowVoteChange && isActive)
+            {
+                <a href="@Url.Action("Details", "Poll", new { id = Model.Id })" class="btn btn-outline-primary btn-sm">
+                    Stimme ändern
+                </a>
+            }
+
+            @{
+                var canViewResults = false;
+                if (Model.ResultsVisibility == ResultsVisibility.RealTime)
+                {
+                    canViewResults = true;
+                }
+                else if (Model.ResultsVisibility == ResultsVisibility.AfterVoting)
+                {
+                    canViewResults = Model.Status == PollStatus.Closed || hasVoted;
+                }
+                else if (Model.ResultsVisibility == ResultsVisibility.CreatorOnly)
+                {
+                    canViewResults = user != null && (user.Id == Model.CreatedById || User.IsInRole("Admin"));
+                }
+            }
+
+            @if (canViewResults)
+            {
+                <a href="@Url.Action("Results", "Poll", new { id = Model.Id })" class="btn btn-outline-secondary btn-sm">
+                    Ergebnisse ansehen
+                </a>
+            }
+        </div>
+    </div>
+</div>

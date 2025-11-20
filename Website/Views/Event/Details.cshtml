@@ -1,0 +1,157 @@
+@model SamMALsurium.Models.Event
+@using SamMALsurium.Models.Enums
+@{
+    ViewData["Title"] = Model.Title;
+    var activePolls = Model.Polls.Where(p => p.Status == PollStatus.Active).OrderByDescending(p => p.CreatedAt).ToList();
+    var closedPolls = Model.Polls.Where(p => p.Status == PollStatus.Closed).OrderByDescending(p => p.CreatedAt).ToList();
+}
+
+<div class="container mt-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/">Home</a></li>
+            <li class="breadcrumb-item active" aria-current="page">@Model.Title</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-start mb-4">
+                <div>
+                    <h1>@Model.Title</h1>
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <div class="mt-2">
+                            <a href="@Url.Action("Create", "PollAdmin", new { eventId = Model.Id })" class="btn btn-primary btn-sm">
+                                <i class="bi bi-plus-circle"></i> Umfrage erstellen
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            @if (!string.IsNullOrEmpty(Model.Description))
+            {
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title">Beschreibung</h5>
+                        <p class="card-text">@Model.Description</p>
+                    </div>
+                </div>
+            }
+
+            <div class="row mb-4">
+                @if (Model.StartDate.HasValue || Model.EndDate.HasValue)
+                {
+                    <div class="col-md-6 mb-3">
+                        <div class="card">
+                            <div class="card-body">
+                                <h6 class="card-subtitle mb-2 text-muted">Zeitraum</h6>
+                                @if (Model.StartDate.HasValue)
+                                {
+                                    <p class="mb-1">
+                                        <strong>Beginn:</strong> @Model.StartDate.Value.ToLocalTime().ToString("dd.MM.yyyy HH:mm")
+                                    </p>
+                                }
+                                @if (Model.EndDate.HasValue)
+                                {
+                                    <p class="mb-0">
+                                        <strong>Ende:</strong> @Model.EndDate.Value.ToLocalTime().ToString("dd.MM.yyyy HH:mm")
+                                    </p>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                @if (!string.IsNullOrEmpty(Model.Location))
+                {
+                    <div class="col-md-6 mb-3">
+                        <div class="card">
+                            <div class="card-body">
+                                <h6 class="card-subtitle mb-2 text-muted">Ort</h6>
+                                <p class="mb-0">@Model.Location</p>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            @if (activePolls.Any())
+            {
+                <div class="mb-4">
+                    <h3 class="mb-3">
+                        <i class="bi bi-bar-chart-fill"></i> Aktive Umfragen
+                    </h3>
+                    <div class="polls-active">
+                        @foreach (var poll in activePolls)
+                        {
+                            <partial name="~/Views/Poll/_PollCard.cshtml" model="poll" />
+                        }
+                    </div>
+                </div>
+            }
+
+            @if (closedPolls.Any())
+            {
+                <div class="mb-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h3 class="mb-0">
+                            <i class="bi bi-archive-fill"></i> Abgeschlossene Umfragen
+                        </h3>
+                        <button class="btn btn-sm btn-outline-secondary" type="button"
+                                data-bs-toggle="collapse"
+                                data-bs-target="#closedPollsCollapse"
+                                aria-expanded="false"
+                                aria-controls="closedPollsCollapse">
+                            Anzeigen (@closedPolls.Count)
+                        </button>
+                    </div>
+                    <div class="collapse" id="closedPollsCollapse">
+                        <div class="polls-closed">
+                            @foreach (var poll in closedPolls)
+                            {
+                                <partial name="~/Views/Poll/_PollCard.cshtml" model="poll" />
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+
+            @if (!activePolls.Any() && !closedPolls.Any())
+            {
+                <div class="alert alert-info" role="alert">
+                    <i class="bi bi-info-circle"></i>
+                    Es sind derzeit keine Umfragen für diese Veranstaltung vorhanden.
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <br />
+                        <a href="@Url.Action("Create", "PollAdmin", new { eventId = Model.Id })">Erstellen Sie die erste Umfrage</a>
+                    }
+                </div>
+            }
+
+            <div class="mt-4">
+                <small class="text-muted">
+                    Erstellt von @Model.CreatedBy?.UserName am @Model.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")
+                </small>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Auto-expand closed polls section if there are no active polls
+        document.addEventListener('DOMContentLoaded', function() {
+            const activePolls = document.querySelectorAll('.polls-active .poll-card');
+            const closedPollsCollapse = document.getElementById('closedPollsCollapse');
+
+            if (activePolls.length === 0 && closedPollsCollapse) {
+                const bsCollapse = new bootstrap.Collapse(closedPollsCollapse, {
+                    toggle: true
+                });
+            }
+        });
+    </script>
+}

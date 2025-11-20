@@ -110,6 +110,70 @@ public class EmailService : IEmailService
         );
     }
 
+    public async Task SendPollCreatedNotificationAsync(string userEmail, string userName, string pollTitle, string? pollDescription, string? eventTitle, string voteUrl)
+    {
+        var model = new
+        {
+            UserName = userName,
+            PollTitle = pollTitle,
+            PollDescription = pollDescription,
+            EventTitle = eventTitle,
+            VoteUrl = _applicationSettings.BaseUrl + voteUrl,
+            BaseUrl = _applicationSettings.BaseUrl
+        };
+
+        var htmlBody = await RenderViewToStringAsync("~/Views/Emails/PollCreated.cshtml", model);
+
+        await SendEmailAsync(
+            userEmail,
+            "Neue Umfrage verfügbar",
+            htmlBody
+        );
+    }
+
+    public async Task SendPollClosingSoonNotificationAsync(string userEmail, string userName, string pollTitle, string? pollDescription, string? eventTitle, string endDate, string voteUrl)
+    {
+        var model = new
+        {
+            UserName = userName,
+            PollTitle = pollTitle,
+            PollDescription = pollDescription,
+            EventTitle = eventTitle,
+            EndDate = endDate,
+            VoteUrl = _applicationSettings.BaseUrl + voteUrl,
+            BaseUrl = _applicationSettings.BaseUrl
+        };
+
+        var htmlBody = await RenderViewToStringAsync("~/Views/Emails/PollClosingSoon.cshtml", model);
+
+        await SendEmailAsync(
+            userEmail,
+            "Umfrage endet bald",
+            htmlBody
+        );
+    }
+
+    public async Task SendPollResultsAvailableNotificationAsync(string userEmail, string userName, string pollTitle, string? pollDescription, string? eventTitle, string resultsUrl)
+    {
+        var model = new
+        {
+            UserName = userName,
+            PollTitle = pollTitle,
+            PollDescription = pollDescription,
+            EventTitle = eventTitle,
+            ResultsUrl = _applicationSettings.BaseUrl + resultsUrl,
+            BaseUrl = _applicationSettings.BaseUrl
+        };
+
+        var htmlBody = await RenderViewToStringAsync("~/Views/Emails/PollResultsAvailable.cshtml", model);
+
+        await SendEmailAsync(
+            userEmail,
+            "Umfrageergebnisse verfügbar",
+            htmlBody
+        );
+    }
+
     private async Task SendEmailAsync(string toEmail, string subject, string htmlBody)
     {
         var message = new MimeMessage();

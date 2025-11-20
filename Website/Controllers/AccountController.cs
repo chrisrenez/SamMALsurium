@@ -375,4 +375,72 @@ public class AccountController : Controller
 
         return View(model);
     }
+
+    [HttpGet]
+    [Authorize]
+    public async Task<IActionResult> NotificationPreferences()
+    {
+        var user = await _userManager.GetUserAsync(User);
+        if (user == null)
+        {
+            return NotFound();
+        }
+
+        var model = new NotificationPreferencesViewModel
+        {
+            EnablePollNotifications = user.EnablePollNotifications
+        };
+
+        return View(model);
+    }
+
+    [HttpPost]
+    [Authorize]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> NotificationPreferences(NotificationPreferencesViewModel model)
+    {
+        if (!ModelState.IsValid)
+        {
+            return View(model);
+        }
+
+        var user = await _userManager.GetUserAsync(User);
+        if (user == null)
+        {
+            return NotFound();
+        }
+
+        // Track changes for logging
+        var oldEnablePollNotifications = user.EnablePollNotifications;
+
+        // Update notification preferences
+        user.EnablePollNotifications = model.EnablePollNotifications;
+
+        var result = await _userManager.UpdateAsync(user);
+
+        if (result.Succeeded)
+        {
+            var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "Unknown";
+
+            _logger.LogInformation(
+                "User notification preferences updated. Email: {Email}, UserId: {UserId}, IP: {IpAddress}, Timestamp: {Timestamp}, Changes: EnablePollNotifications: {OldValue} -> {NewValue}",
+                user.Email, user.Id, ipAddress, DateTime.UtcNow, oldEnablePollNotifications, user.EnablePollNotifications);
+
+            TempData["SuccessMessage"] = "Benachrichtigungseinstellungen erfolgreich aktualisiert";
+            return RedirectToAction(nameof(NotificationPreferences));
+        }
+
+        // Log preferences update failure
+        var failureIpAddress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "Unknown";
+        _logger.LogWarning(
+            "Notification preferences update failed for email: {Email}, IP: {IpAddress}, Timestamp: {Timestamp}, Errors: {Errors}",
+            user.Email, failureIpAddress, DateTime.UtcNow, string.Join(", ", result.Errors.Select(e => e.Description)));
+
+        foreach (var error in result.Errors)
+        {
+            ModelState.AddModelError(string.Empty, error.Description);
+        }
+
+        return View(model);
+    }
 }

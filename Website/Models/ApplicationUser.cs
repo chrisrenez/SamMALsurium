@@ -14,4 +14,7 @@ public class ApplicationUser : IdentityUser
     public string? ApprovedById { get; set; }
     public DateTime? ApprovedAt { get; set; }
     public DateTime? RejectedAt { get; set; }
+
+    // Notification preferences
+    public bool EnablePollNotifications { get; set; } = true;
 }

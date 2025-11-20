@@ -1,0 +1,264 @@
+@model PollListViewModel
+@{
+    ViewData["Title"] = "Umfragen verwalten";
+}
+
+<nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/Dashboard/Index">Admin</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Umfragen</li>
+    </ol>
+</nav>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Umfragen</h1>
+    <a href="@Url.Action("Create")" class="btn btn-primary">
+        <i class="bi bi-plus-circle me-2"></i>Neue Umfrage erstellen
+    </a>
+</div>
+
+<!-- Filter Section -->
+<partial name="_PollFilters" model="Model.Filters" />
+
+<!-- Poll List -->
+<div class="card">
+    <div class="card-body">
+        @if (Model.Polls.Any())
+        {
+            <!-- Desktop Table View -->
+            <div class="table-responsive d-none d-lg-block">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Titel</th>
+                            <th>Typ</th>
+                            <th>Status</th>
+                            <th>Veranstaltung</th>
+                            <th>Stimmen</th>
+                            <th>Enddatum</th>
+                            <th>Aktionen</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var poll in Model.Polls)
+                        {
+                            <tr>
+                                <td>
+                                    <strong>@poll.Title</strong>
+                                </td>
+                                <td>
+                                    <span class="badge bg-info">
+                                        @poll.Type.ToString() switch
+                                        {
+                                            "MultipleChoice" => "Multiple Choice",
+                                            "RankedChoice" => "Rangfolge",
+                                            "ScoreVoting" => "Bewertung",
+                                            "AvailabilityGrid" => "Verfügbarkeit",
+                                            _ => poll.Type.ToString()
+                                        }
+                                    </span>
+                                </td>
+                                <td>
+                                    @switch (poll.Status)
+                                    {
+                                        case PollStatus.Active:
+                                            <span class="badge bg-success">Aktiv</span>
+                                            break;
+                                        case PollStatus.Closed:
+                                            <span class="badge bg-secondary">Geschlossen</span>
+                                            break;
+                                        case PollStatus.Archived:
+                                            <span class="badge bg-dark">Archiviert</span>
+                                            break;
+                                    }
+                                </td>
+                                <td>
+                                    @if (poll.EventId.HasValue)
+                                    {
+                                        <a href="#">@poll.EventTitle</a>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">-</span>
+                                    }
+                                </td>
+                                <td>@poll.VoteCount</td>
+                                <td>
+                                    @if (poll.EndDate.HasValue)
+                                    {
+                                        @poll.EndDate.Value.ToString("dd.MM.yyyy")
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">-</span>
+                                    }
+                                </td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        @if (poll.CanEdit)
+                                        {
+                                            <a href="@Url.Action("Edit", new { id = poll.Id })" class="btn btn-sm btn-outline-primary" title="Bearbeiten">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                        }
+                                        @if (poll.Status == PollStatus.Active)
+                                        {
+                                            <form method="post" action="@Url.Action("Close", new { id = poll.Id })" class="d-inline close-poll-form">
+                                                @Html.AntiForgeryToken()
+                                                <button type="submit" class="btn btn-sm btn-outline-warning" title="Schließen">
+                                                    <i class="bi bi-lock"></i>
+                                                </button>
+                                            </form>
+                                        }
+                                        @if (poll.Status != PollStatus.Archived)
+                                        {
+                                            <form method="post" action="@Url.Action("Archive", new { id = poll.Id })" class="d-inline archive-poll-form">
+                                                @Html.AntiForgeryToken()
+                                                <button type="submit" class="btn btn-sm btn-outline-secondary" title="Archivieren">
+                                                    <i class="bi bi-archive"></i>
+                                                </button>
+                                            </form>
+                                        }
+                                        <a href="@Url.Action("ExportResults", new { id = poll.Id })" class="btn btn-sm btn-outline-success" title="Exportieren">
+                                            <i class="bi bi-download"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Mobile Card View -->
+            <div class="d-lg-none">
+                @foreach (var poll in Model.Polls)
+                {
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h5 class="card-title mb-0">@poll.Title</h5>
+                                @switch (poll.Status)
+                                {
+                                    case PollStatus.Active:
+                                        <span class="badge bg-success">Aktiv</span>
+                                        break;
+                                    case PollStatus.Closed:
+                                        <span class="badge bg-secondary">Geschlossen</span>
+                                        break;
+                                    case PollStatus.Archived:
+                                        <span class="badge bg-dark">Archiviert</span>
+                                        break;
+                                }
+                            </div>
+                            <div class="mb-2">
+                                <span class="badge bg-info me-2">
+                                    @poll.Type.ToString() switch
+                                    {
+                                        "MultipleChoice" => "Multiple Choice",
+                                        "RankedChoice" => "Rangfolge",
+                                        "ScoreVoting" => "Bewertung",
+                                        "AvailabilityGrid" => "Verfügbarkeit",
+                                        _ => poll.Type.ToString()
+                                    }
+                                </span>
+                                @if (poll.EventId.HasValue)
+                                {
+                                    <small class="text-muted">@poll.EventTitle</small>
+                                }
+                            </div>
+                            <div class="text-muted mb-3">
+                                <small>
+                                    <i class="bi bi-people me-1"></i>@poll.VoteCount Stimmen
+                                    @if (poll.EndDate.HasValue)
+                                    {
+                                        <span class="ms-2">
+                                            <i class="bi bi-calendar me-1"></i>@poll.EndDate.Value.ToString("dd.MM.yyyy")
+                                        </span>
+                                    }
+                                </small>
+                            </div>
+                            <div class="btn-group w-100" role="group">
+                                @if (poll.CanEdit)
+                                {
+                                    <a href="@Url.Action("Edit", new { id = poll.Id })" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-pencil me-1"></i>Bearbeiten
+                                    </a>
+                                }
+                                @if (poll.Status == PollStatus.Active)
+                                {
+                                    <form method="post" action="@Url.Action("Close", new { id = poll.Id })" class="d-inline close-poll-form flex-fill">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm btn-outline-warning w-100">
+                                            <i class="bi bi-lock me-1"></i>Schließen
+                                        </button>
+                                    </form>
+                                }
+                                <a href="@Url.Action("ExportResults", new { id = poll.Id })" class="btn btn-sm btn-outline-success">
+                                    <i class="bi bi-download me-1"></i>Export
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <!-- Pagination -->
+            @if (Model.Pagination.TotalPages > 1)
+            {
+                <nav aria-label="Poll pagination" class="mt-4">
+                    <ul class="pagination justify-content-center">
+                        <li class="page-item @(!Model.Pagination.HasPreviousPage ? "disabled" : "")">
+                            <a class="page-link" href="@Url.Action("Index", new {
+                                page = Model.Pagination.CurrentPage - 1,
+                                status = Model.Filters.Status,
+                                type = Model.Filters.Type,
+                                eventId = Model.Filters.EventId,
+                                searchTerm = Model.Filters.SearchTerm,
+                                pageSize = Model.Pagination.PageSize
+                            })">Zurück</a>
+                        </li>
+                        @for (int i = 1; i <= Model.Pagination.TotalPages; i++)
+                        {
+                            <li class="page-item @(i == Model.Pagination.CurrentPage ? "active" : "")">
+                                <a class="page-link" href="@Url.Action("Index", new {
+                                    page = i,
+                                    status = Model.Filters.Status,
+                                    type = Model.Filters.Type,
+                                    eventId = Model.Filters.EventId,
+                                    searchTerm = Model.Filters.SearchTerm,
+                                    pageSize = Model.Pagination.PageSize
+                                })">@i</a>
+                            </li>
+                        }
+                        <li class="page-item @(!Model.Pagination.HasNextPage ? "disabled" : "")">
+                            <a class="page-link" href="@Url.Action("Index", new {
+                                page = Model.Pagination.CurrentPage + 1,
+                                status = Model.Filters.Status,
+                                type = Model.Filters.Type,
+                                eventId = Model.Filters.EventId,
+                                searchTerm = Model.Filters.SearchTerm,
+                                pageSize = Model.Pagination.PageSize
+                            })">Weiter</a>
+                        </li>
+                    </ul>
+                </nav>
+            }
+        }
+        else
+        {
+            <div class="text-center py-5">
+                <i class="bi bi-inbox" style="font-size: 3rem; color: #ccc;"></i>
+                <p class="text-muted mt-3">Keine Umfragen gefunden</p>
+                @if (!string.IsNullOrEmpty(Model.Filters.SearchTerm) || Model.Filters.Status.HasValue || Model.Filters.Type.HasValue)
+                {
+                    <a href="@Url.Action("Index")" class="btn btn-outline-primary">Filter zurücksetzen</a>
+                }
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script type="module" src="~/js/Polls/PollAdmin.js" asp-append-version="true"></script>
+}

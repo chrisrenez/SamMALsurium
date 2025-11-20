@@ -22,10 +22,8 @@
                        aria-disabled="true">
                         <i class="bi bi-calendar-event me-2"></i>Veranstaltungen
                     </a>
-                    <a href="#"
-                       class="btn btn-admin-nav disabled"
-                       tabindex="-1"
-                       aria-disabled="true">
+                    <a href="/PollAdmin/Index"
+                       class="btn btn-admin-nav @(currentController == "PollAdmin" ? "active" : "")">
                         <i class="bi bi-bar-chart me-2"></i>Umfragen
                     </a>
                 </div>

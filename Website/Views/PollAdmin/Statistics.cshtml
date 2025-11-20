@@ -1,0 +1,169 @@
+@model PollStatisticsViewModel
+@{
+    ViewData["Title"] = "Umfragen-Statistiken";
+}
+
+<nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/Dashboard/Index">Admin</a></li>
+        <li class="breadcrumb-item"><a href="@Url.Action("Index")">Umfragen</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Statistiken</li>
+    </ol>
+</nav>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Umfragen-Statistiken</h1>
+    <a href="@Url.Action("Index")" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left me-1"></i>Zurück zur Liste
+    </a>
+</div>
+
+<!-- Summary Cards -->
+<div class="row mb-4">
+    <div class="col-md-3 mb-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="bi bi-bar-chart" style="font-size: 2rem; color: var(--bs-primary);"></i>
+                <h2 class="mt-3 mb-0">@Model.TotalPolls</h2>
+                <p class="text-muted mb-0">Gesamte Umfragen</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="bi bi-check-circle" style="font-size: 2rem; color: var(--bs-success);"></i>
+                <h2 class="mt-3 mb-0">@Model.ActivePolls</h2>
+                <p class="text-muted mb-0">Aktive Umfragen</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="bi bi-lock" style="font-size: 2rem; color: var(--bs-warning);"></i>
+                <h2 class="mt-3 mb-0">@Model.ClosedPolls</h2>
+                <p class="text-muted mb-0">Geschlossene Umfragen</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="bi bi-people" style="font-size: 2rem; color: var(--bs-info);"></i>
+                <h2 class="mt-3 mb-0">@Model.TotalVotes</h2>
+                <p class="text-muted mb-0">Gesamte Stimmen</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Most Active Polls -->
+@if (Model.MostActivePolls.Any())
+{
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">Aktivste Umfragen</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Rang</th>
+                            <th>Titel</th>
+                            <th>Stimmen</th>
+                            <th>Aktionen</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (int i = 0; i < Model.MostActivePolls.Count; i++)
+                        {
+                            var poll = Model.MostActivePolls[i];
+                            <tr>
+                                <td>
+                                    @if (i == 0)
+                                    {
+                                        <i class="bi bi-trophy-fill text-warning"></i>
+                                    }
+                                    else
+                                    {
+                                        <span>@(i + 1)</span>
+                                    }
+                                </td>
+                                <td>@poll.Title</td>
+                                <td>
+                                    <strong>@poll.VoteCount</strong>
+                                </td>
+                                <td>
+                                    <a href="@Url.Action("Edit", new { id = poll.PollId })" class="btn btn-sm btn-outline-primary">
+                                        Details anzeigen
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Status Breakdown -->
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0">Status-Übersicht</h5>
+    </div>
+    <div class="card-body">
+        <div class="row text-center">
+            <div class="col-md-4">
+                <div class="mb-2">
+                    <div class="progress" style="height: 30px;">
+                        @{
+                            var activePercentage = Model.TotalPolls > 0 ? (Model.ActivePolls * 100.0 / Model.TotalPolls) : 0;
+                        }
+                        <div class="progress-bar bg-success" role="progressbar"
+                             style="width: @activePercentage%"
+                             aria-valuenow="@activePercentage" aria-valuemin="0" aria-valuemax="100">
+                            @activePercentage.ToString("F1")%
+                        </div>
+                    </div>
+                </div>
+                <p class="mb-0"><strong>Aktiv</strong></p>
+                <p class="text-muted">@Model.ActivePolls von @Model.TotalPolls</p>
+            </div>
+            <div class="col-md-4">
+                <div class="mb-2">
+                    <div class="progress" style="height: 30px;">
+                        @{
+                            var closedPercentage = Model.TotalPolls > 0 ? (Model.ClosedPolls * 100.0 / Model.TotalPolls) : 0;
+                        }
+                        <div class="progress-bar bg-warning" role="progressbar"
+                             style="width: @closedPercentage%"
+                             aria-valuenow="@closedPercentage" aria-valuemin="0" aria-valuemax="100">
+                            @closedPercentage.ToString("F1")%
+                        </div>
+                    </div>
+                </div>
+                <p class="mb-0"><strong>Geschlossen</strong></p>
+                <p class="text-muted">@Model.ClosedPolls von @Model.TotalPolls</p>
+            </div>
+            <div class="col-md-4">
+                <div class="mb-2">
+                    <div class="progress" style="height: 30px;">
+                        @{
+                            var archivedPercentage = Model.TotalPolls > 0 ? (Model.ArchivedPolls * 100.0 / Model.TotalPolls) : 0;
+                        }
+                        <div class="progress-bar bg-secondary" role="progressbar"
+                             style="width: @archivedPercentage%"
+                             aria-valuenow="@archivedPercentage" aria-valuemin="0" aria-valuemax="100">
+                            @archivedPercentage.ToString("F1")%
+                        </div>
+                    </div>
+                </div>
+                <p class="mb-0"><strong>Archiviert</strong></p>
+                <p class="text-muted">@Model.ArchivedPolls von @Model.TotalPolls</p>
+            </div>
+        </div>
+    </div>
+</div>

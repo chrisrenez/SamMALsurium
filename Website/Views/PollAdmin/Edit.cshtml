@@ -1,0 +1,369 @@
+@model EditPollViewModel
+@{
+    ViewData["Title"] = "Umfrage bearbeiten";
+}
+
+<nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/Dashboard/Index">Admin</a></li>
+        <li class="breadcrumb-item"><a href="@Url.Action("Index")">Umfragen</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Bearbeiten</li>
+    </ol>
+</nav>
+
+<h1 class="mb-4">Umfrage bearbeiten</h1>
+
+@if (Model.HasVotes)
+{
+    <div class="alert alert-warning" role="alert">
+        <i class="bi bi-exclamation-triangle me-2"></i>
+        <strong>Hinweis:</strong> Diese Umfrage hat bereits @Model.VoteCount Stimme(n).
+        Optionen und bestimmte Einstellungen können nicht mehr geändert werden.
+    </div>
+}
+
+<form asp-action="Edit" method="post" asp-route-id="@Model.Id" id="pollForm">
+    <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+    <input asp-for="Id" type="hidden" />
+    <input asp-for="Type" type="hidden" />
+    <input asp-for="HasVotes" type="hidden" />
+    <input asp-for="VoteCount" type="hidden" />
+
+    <!-- Basic Information -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">Grundinformationen</h5>
+        </div>
+        <div class="card-body">
+            <div class="mb-3">
+                <label asp-for="Title" class="form-label">Titel <span class="text-danger">*</span></label>
+                <input asp-for="Title" class="form-control" />
+                <span asp-validation-for="Title" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Description" class="form-label">Beschreibung</label>
+                <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+                <span asp-validation-for="Description" class="text-danger"></span>
+            </div>
+
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Umfragetyp</label>
+                    <input type="text" class="form-control" value="@Model.Type.ToString() switch
+                    {
+                        "MultipleChoice" => "Multiple Choice",
+                        "RankedChoice" => "Rangfolge",
+                        "ScoreVoting" => "Bewertung",
+                        "AvailabilityGrid" => "Verfügbarkeit",
+                        _ => Model.Type.ToString()
+                    }" disabled />
+                    <small class="text-muted">Kann nicht geändert werden</small>
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <label asp-for="Target" class="form-label">Ziel</label>
+                    @if (Model.HasVotes)
+                    {
+                        <select asp-for="Target" class="form-select" disabled>
+                            <option value="@PollTarget.Location">Ort</option>
+                            <option value="@PollTarget.Time">Zeit</option>
+                            <option value="@PollTarget.Other">Sonstiges</option>
+                        </select>
+                    }
+                    else
+                    {
+                        <select asp-for="Target" class="form-select">
+                            <option value="@PollTarget.Location">Ort</option>
+                            <option value="@PollTarget.Time">Zeit</option>
+                            <option value="@PollTarget.Other">Sonstiges</option>
+                        </select>
+                    }
+                    @if (Model.HasVotes)
+                    {
+                        <input asp-for="Target" type="hidden" />
+                        <small class="text-muted">Gesperrt (Stimmen vorhanden)</small>
+                    }
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <label asp-for="EventId" class="form-label">Veranstaltung</label>
+                    @if (Model.HasVotes)
+                    {
+                        <select asp-for="EventId" class="form-select" disabled>
+                            <option value="">Keine Veranstaltung</option>
+                            @foreach (var evt in ViewBag.Events)
+                            {
+                                @if (Model.EventId == evt.Id)
+                                {
+                                    <option value="@evt.Id" selected>@evt.Title</option>
+                                }
+                                else
+                                {
+                                    <option value="@evt.Id">@evt.Title</option>
+                                }
+                            }
+                        </select>
+                    }
+                    else
+                    {
+                        <select asp-for="EventId" class="form-select">
+                            <option value="">Keine Veranstaltung</option>
+                            @foreach (var evt in ViewBag.Events)
+                            {
+                                @if (Model.EventId == evt.Id)
+                                {
+                                    <option value="@evt.Id" selected>@evt.Title</option>
+                                }
+                                else
+                                {
+                                    <option value="@evt.Id">@evt.Title</option>
+                                }
+                            }
+                        </select>
+                    }
+                    @if (Model.HasVotes)
+                    {
+                        <input asp-for="EventId" type="hidden" />
+                        <small class="text-muted">Gesperrt (Stimmen vorhanden)</small>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Type-Specific Configuration -->
+    @if (!Model.HasVotes)
+    {
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Typ-spezifische Einstellungen</h5>
+            </div>
+            <div class="card-body">
+                @if (Model.Type == PollType.MultipleChoice)
+                {
+                    <div class="form-check">
+                        <input asp-for="IsMultiSelect" class="form-check-input" type="checkbox" />
+                        <label asp-for="IsMultiSelect" class="form-check-label">
+                            Mehrfachauswahl erlauben
+                        </label>
+                    </div>
+                }
+                else if (Model.Type == PollType.ScoreVoting)
+                {
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="ScoreMin" class="form-label">Minimale Punktzahl</label>
+                            <input asp-for="ScoreMin" type="number" class="form-control" min="0" max="10" />
+                            <span asp-validation-for="ScoreMin" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="ScoreMax" class="form-label">Maximale Punktzahl</label>
+                            <input asp-for="ScoreMax" type="number" class="form-control" min="1" max="10" />
+                            <span asp-validation-for="ScoreMax" class="text-danger"></span>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+    else
+    {
+        <input asp-for="IsMultiSelect" type="hidden" />
+        <input asp-for="ScoreMin" type="hidden" />
+        <input asp-for="ScoreMax" type="hidden" />
+    }
+
+    <!-- Options -->
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Optionen</h5>
+            @if (!Model.HasVotes)
+            {
+                <button type="button" class="btn btn-sm btn-outline-primary" id="addOption">
+                    <i class="bi bi-plus-circle me-1"></i>Option hinzufügen
+                </button>
+            }
+        </div>
+        <div class="card-body">
+            @if (Model.HasVotes)
+            {
+                <div class="alert alert-info mb-3">
+                    <i class="bi bi-lock me-2"></i>Optionen können nicht geändert werden, da bereits Stimmen abgegeben wurden.
+                </div>
+                @for (int i = 0; i < Model.Options.Count; i++)
+                {
+                    <div class="mb-2">
+                        <strong>@Model.Options[i].Label</strong>
+                        @if (!string.IsNullOrEmpty(Model.Options[i].AdditionalInfo))
+                        {
+                            <span class="text-muted ms-2">(@Model.Options[i].AdditionalInfo)</span>
+                        }
+                        <input asp-for="Options[i].Label" type="hidden" />
+                        <input asp-for="Options[i].AdditionalInfo" type="hidden" />
+                        <input asp-for="Options[i].DisplayOrder" type="hidden" />
+                    </div>
+                }
+            }
+            else
+            {
+                <div id="optionsContainer">
+                    @for (int i = 0; i < Model.Options.Count; i++)
+                    {
+                        <div class="option-item mb-3" data-index="@i">
+                            <div class="row">
+                                <div class="col-md-5">
+                                    <input asp-for="Options[i].Label" class="form-control" placeholder="Option @(i + 1)" />
+                                    <span asp-validation-for="Options[i].Label" class="text-danger"></span>
+                                </div>
+                                <div class="col-md-5">
+                                    <input asp-for="Options[i].AdditionalInfo" class="form-control" placeholder="Zusatzinfo (optional)" />
+                                </div>
+                                <div class="col-md-2">
+                                    @if (i < 2)
+                                    {
+                                        <button type="button" class="btn btn-outline-danger remove-option" disabled>
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    }
+                                    else
+                                    {
+                                        <button type="button" class="btn btn-outline-danger remove-option">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    }
+                                </div>
+                                <input asp-for="Options[i].DisplayOrder" type="hidden" value="@i" />
+                            </div>
+                        </div>
+                    }
+                </div>
+                <small class="text-muted">Mindestens 2 Optionen erforderlich, maximal 50 erlaubt</small>
+            }
+        </div>
+    </div>
+
+    <!-- Privacy & Settings -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">Datenschutz & Einstellungen</h5>
+        </div>
+        <div class="card-body">
+            <div class="form-check mb-3">
+                <input asp-for="IsAnonymous" class="form-check-input" type="checkbox" />
+                <label asp-for="IsAnonymous" class="form-check-label">
+                    Anonyme Abstimmung
+                </label>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="ResultsVisibility" class="form-label">Ergebnis-Sichtbarkeit</label>
+                <select asp-for="ResultsVisibility" class="form-select">
+                    <option value="@ResultsVisibility.RealTime">Echtzeit (sofort sichtbar)</option>
+                    <option value="@ResultsVisibility.AfterVoting">Nach der Abstimmung</option>
+                    <option value="@ResultsVisibility.CreatorOnly">Nur für Ersteller</option>
+                </select>
+            </div>
+
+            <div class="form-check mb-3">
+                <input asp-for="AllowVoteChange" class="form-check-input" type="checkbox" />
+                <label asp-for="AllowVoteChange" class="form-check-label">
+                    Änderung der Stimme erlauben
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scheduling -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">Zeitplanung</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label asp-for="StartDate" class="form-label">Startdatum</label>
+                    @if (Model.HasVotes)
+                    {
+                        <input asp-for="StartDate" type="datetime-local" class="form-control" disabled />
+                    }
+                    else
+                    {
+                        <input asp-for="StartDate" type="datetime-local" class="form-control" />
+                    }
+                    @if (Model.HasVotes)
+                    {
+                        <input asp-for="StartDate" type="hidden" />
+                        <small class="text-muted">Gesperrt (Stimmen vorhanden)</small>
+                    }
+                    <span asp-validation-for="StartDate" class="text-danger"></span>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label asp-for="EndDate" class="form-label">Enddatum</label>
+                    <input asp-for="EndDate" type="datetime-local" class="form-control" />
+                    <span asp-validation-for="EndDate" class="text-danger"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Submit Buttons -->
+    <div class="d-flex gap-2 mb-4">
+        <button type="submit" class="btn btn-primary">
+            <i class="bi bi-check-circle me-1"></i>Änderungen speichern
+        </button>
+        <a href="@Url.Action("Index")" class="btn btn-outline-secondary">Abbrechen</a>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    @if (!Model.HasVotes)
+    {
+        <script>
+            // Add option functionality
+            let optionIndex = @Model.Options.Count;
+            document.getElementById('addOption').addEventListener('click', function () {
+                if (optionIndex >= 50) {
+                    alert('Maximal 50 Optionen erlaubt');
+                    return;
+                }
+
+                const container = document.getElementById('optionsContainer');
+                const newOption = document.createElement('div');
+                newOption.className = 'option-item mb-3';
+                newOption.setAttribute('data-index', optionIndex);
+                newOption.innerHTML = `
+                    <div class="row">
+                        <div class="col-md-5">
+                            <input name="Options[${optionIndex}].Label" class="form-control" placeholder="Option ${optionIndex + 1}" required />
+                        </div>
+                        <div class="col-md-5">
+                            <input name="Options[${optionIndex}].AdditionalInfo" class="form-control" placeholder="Zusatzinfo (optional)" />
+                        </div>
+                        <div class="col-md-2">
+                            <button type="button" class="btn btn-outline-danger remove-option">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                        <input name="Options[${optionIndex}].DisplayOrder" type="hidden" value="${optionIndex}" />
+                    </div>
+                `;
+                container.appendChild(newOption);
+                optionIndex++;
+            });
+
+            // Remove option functionality
+            document.addEventListener('click', function (e) {
+                if (e.target.closest('.remove-option')) {
+                    const optionCount = document.querySelectorAll('.option-item').length;
+                    if (optionCount <= 2) {
+                        alert('Mindestens 2 Optionen erforderlich');
+                        return;
+                    }
+                    e.target.closest('.option-item').remove();
+                }
+            });
+        </script>
+    }
+}

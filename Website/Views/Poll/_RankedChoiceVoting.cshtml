@@ -13,7 +13,7 @@
             <i class="bi bi-info-circle"></i> Ordnen Sie die Optionen nach Ihrer Präferenz (1 = am meisten bevorzugt). Sie können Optionen unbewertet lassen.
         </p>
 
-        <div id="ranked-options-container" class="ranked-options-container">
+        <div id="ranked-options-container" class="ranked-options-container" role="list" aria-label="Optionen zum Rangieren">
             @foreach (var option in Model.Options)
             {
                 var currentRank = 0;
@@ -40,14 +40,15 @@
                     }
                 }
 
-                <div class="card mb-2 ranked-option" data-option-id="@option.Id" draggable="true">
+                <div class="card mb-2 ranked-option" data-option-id="@option.Id" draggable="true" role="listitem" aria-label="Option: @option.Label">
                     <div class="card-body p-3">
                         <div class="d-flex align-items-center gap-3">
-                            <div class="drag-handle" style="cursor: move;">
-                                <i class="bi bi-grip-vertical"></i>
+                            <div class="drag-handle" style="cursor: move;" role="button" aria-label="Ziehen zum Neuordnen der Option @option.Label" tabindex="0">
+                                <i class="bi bi-grip-vertical" aria-hidden="true"></i>
                             </div>
                             <div class="flex-shrink-0" style="width: 80px;">
-                                <select name="rank_@option.Id" class="form-select form-select-sm rank-select" data-option-id="@option.Id">
+                                <label for="rank-select-@option.Id" class="visually-hidden">Rang für @option.Label</label>
+                                <select id="rank-select-@option.Id" name="rank_@option.Id" class="form-select form-select-sm rank-select" data-option-id="@option.Id" aria-label="Rang für @option.Label">
                                     @if (currentRank == 0)
                                     {
                                         <option value="0" selected>-</option>

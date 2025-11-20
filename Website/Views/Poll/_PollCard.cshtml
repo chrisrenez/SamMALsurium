@@ -14,32 +14,32 @@
     var canVote = isActive && (!Model.StartDate.HasValue || Model.StartDate.Value <= now) && (!Model.EndDate.HasValue || Model.EndDate.Value > now);
 }
 
-<div class="card poll-card mb-3">
-    <div class="card-body">
+<div class="content-card card-base card-padding poll-card mb-3">
+    <div>
         <div class="d-flex justify-content-between align-items-start mb-2">
             <h5 class="card-title mb-0">@Model.Title</h5>
-            <div class="d-flex gap-2 flex-wrap">
+            <div class="d-flex gap-2 flex-wrap" role="group" aria-label="Umfragestatus">
                 @if (Model.Status == PollStatus.Active)
                 {
-                    <span class="badge bg-success">Aktiv</span>
+                    <span class="badge bg-success" aria-label="Status: Aktiv">Aktiv</span>
                 }
                 else if (Model.Status == PollStatus.Closed)
                 {
-                    <span class="badge bg-secondary">Geschlossen</span>
+                    <span class="badge bg-secondary" aria-label="Status: Geschlossen">Geschlossen</span>
                 }
                 else if (Model.Status == PollStatus.Archived)
                 {
-                    <span class="badge bg-dark">Archiviert</span>
+                    <span class="badge bg-dark" aria-label="Status: Archiviert">Archiviert</span>
                 }
 
                 @if (isClosingSoon && isActive)
                 {
-                    <span class="badge bg-warning text-dark">Endet bald</span>
+                    <span class="badge bg-warning text-dark" role="status" aria-label="Warnung: Endet bald">Endet bald</span>
                 }
 
                 @if (hasVoted)
                 {
-                    <span class="badge bg-info">Sie haben abgestimmt</span>
+                    <span class="badge bg-info" aria-label="Sie haben bereits abgestimmt">Sie haben abgestimmt</span>
                 }
             </div>
         </div>

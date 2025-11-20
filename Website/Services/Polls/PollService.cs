@@ -1,5 +1,6 @@
 using System.Text;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using SamMALsurium.Data;
 using SamMALsurium.Models;
 using SamMALsurium.Models.Enums;
@@ -11,12 +12,15 @@ public class PollService : IPollService
     private readonly ApplicationDbContext _context;
     private readonly ILogger<PollService> _logger;
     private readonly IEmailService _emailService;
+    private readonly IMemoryCache _cache;
+    private const int CacheExpirationMinutes = 5;
 
-    public PollService(ApplicationDbContext context, ILogger<PollService> logger, IEmailService emailService)
+    public PollService(ApplicationDbContext context, ILogger<PollService> logger, IEmailService emailService, IMemoryCache cache)
     {
         _context = context;
         _logger = logger;
         _emailService = emailService;
+        _cache = cache;
     }
 
     public async Task<Poll> CreatePollAsync(Poll poll)
@@ -56,6 +60,12 @@ public class PollService : IPollService
         await _context.SaveChangesAsync();
 
         _logger.LogInformation("Poll created with ID {PollId} by user {UserId}", poll.Id, poll.CreatedById);
+
+        // Invalidate cache for event polls if associated with an event
+        if (poll.EventId.HasValue)
+        {
+            _cache.Remove($"event_polls_{poll.EventId.Value}");
+        }
 
         // Send notifications to users with poll notifications enabled
         await SendPollCreatedNotificationsAsync(poll);
@@ -120,12 +130,25 @@ public class PollService : IPollService
 
     public async Task<List<Poll>> GetPollsByEventAsync(int eventId)
     {
-        return await _context.Polls
-            .Include(p => p.Options)
-            .Include(p => p.CreatedBy)
-            .Where(p => p.EventId == eventId)
-            .OrderByDescending(p => p.CreatedAt)
-            .ToListAsync();
+        var cacheKey = $"event_polls_{eventId}";
+
+        if (!_cache.TryGetValue(cacheKey, out List<Poll>? polls))
+        {
+            polls = await _context.Polls
+                .Include(p => p.Options)
+                .Include(p => p.CreatedBy)
+                .Where(p => p.EventId == eventId)
+                .OrderByDescending(p => p.CreatedAt)
+                .ToListAsync();
+
+            var cacheOptions = new MemoryCacheEntryOptions()
+                .SetAbsoluteExpiration(TimeSpan.FromMinutes(CacheExpirationMinutes));
+
+            _cache.Set(cacheKey, polls, cacheOptions);
+            _logger.LogDebug("Cached polls for event {EventId}", eventId);
+        }
+
+        return polls ?? new List<Poll>();
     }
 
     public async Task<List<Poll>> GetAllPollsAsync(
@@ -226,6 +249,13 @@ public class PollService : IPollService
         }
 
         await _context.SaveChangesAsync();
+
+        // Invalidate cache for event polls if associated with an event
+        if (existingPoll.EventId.HasValue)
+        {
+            _cache.Remove($"event_polls_{existingPoll.EventId.Value}");
+        }
+
         return existingPoll;
     }
 
@@ -245,6 +275,12 @@ public class PollService : IPollService
         poll.Status = PollStatus.Closed;
         await _context.SaveChangesAsync();
 
+        // Invalidate cache for event polls if associated with an event
+        if (poll.EventId.HasValue)
+        {
+            _cache.Remove($"event_polls_{poll.EventId.Value}");
+        }
+
         _logger.LogInformation("Poll {PollId} closed by user {UserId}", pollId, userId);
 
         return poll;
@@ -260,6 +296,12 @@ public class PollService : IPollService
 
         poll.Status = PollStatus.Archived;
         await _context.SaveChangesAsync();
+
+        // Invalidate cache for event polls if associated with an event
+        if (poll.EventId.HasValue)
+        {
+            _cache.Remove($"event_polls_{poll.EventId.Value}");
+        }
 
         _logger.LogInformation("Poll {PollId} archived by user {UserId}", pollId, userId);
 

@@ -6,8 +6,8 @@
     var closedPolls = Model.Polls.Where(p => p.Status == PollStatus.Closed).OrderByDescending(p => p.CreatedAt).ToList();
 }
 
-<div class="container mt-4">
-    <nav aria-label="breadcrumb">
+<div class="container-xxl py-3">
+    <nav aria-label="breadcrumb" class="mb-3">
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="/">Home</a></li>
             <li class="breadcrumb-item active" aria-current="page">@Model.Title</li>
@@ -16,62 +16,49 @@
 
     <div class="row">
         <div class="col-12">
-            <div class="d-flex justify-content-between align-items-start mb-4">
-                <div>
-                    <h1>@Model.Title</h1>
-                    @if (User.IsInRole("Admin"))
-                    {
-                        <div class="mt-2">
-                            <a href="@Url.Action("Create", "PollAdmin", new { eventId = Model.Id })" class="btn btn-primary btn-sm">
-                                <i class="bi bi-plus-circle"></i> Umfrage erstellen
-                            </a>
-                        </div>
-                    }
+            <div class="content-card card-base card-padding mb-4">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <h1 class="mb-3">@Model.Title</h1>
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <div class="mt-2">
+                                <a href="@Url.Action("Create", "PollAdmin", new { eventId = Model.Id })" class="btn btn-primary btn-sm">
+                                    <i class="bi bi-plus-circle"></i> Umfrage erstellen
+                                </a>
+                            </div>
+                        }
+                    </div>
                 </div>
             </div>
 
             @if (!string.IsNullOrEmpty(Model.Description))
             {
-                <div class="card mb-4">
-                    <div class="card-body">
-                        <h5 class="card-title">Beschreibung</h5>
-                        <p class="card-text">@Model.Description</p>
-                    </div>
+                <div class="content-card card-base card-padding mb-4">
+                    <h5 class="mb-3">Beschreibung</h5>
+                    <p>@Model.Description</p>
                 </div>
             }
 
             <div class="row mb-4">
-                @if (Model.StartDate.HasValue || Model.EndDate.HasValue)
-                {
-                    <div class="col-md-6 mb-3">
-                        <div class="card">
-                            <div class="card-body">
-                                <h6 class="card-subtitle mb-2 text-muted">Zeitraum</h6>
-                                @if (Model.StartDate.HasValue)
-                                {
-                                    <p class="mb-1">
-                                        <strong>Beginn:</strong> @Model.StartDate.Value.ToLocalTime().ToString("dd.MM.yyyy HH:mm")
-                                    </p>
-                                }
-                                @if (Model.EndDate.HasValue)
-                                {
-                                    <p class="mb-0">
-                                        <strong>Ende:</strong> @Model.EndDate.Value.ToLocalTime().ToString("dd.MM.yyyy HH:mm")
-                                    </p>
-                                }
-                            </div>
-                        </div>
+                <div class="col-md-6 mb-3">
+                    <div class="content-card card-base card-padding">
+                        <h6 class="mb-3 text-muted">Zeitraum</h6>
+                        <p class="mb-1">
+                            <strong>Beginn:</strong> @Model.StartDate.ToLocalTime().ToString("dd.MM.yyyy HH:mm")
+                        </p>
+                        <p class="mb-0">
+                            <strong>Ende:</strong> @Model.EndDate.ToLocalTime().ToString("dd.MM.yyyy HH:mm")
+                        </p>
                     </div>
-                }
+                </div>
 
                 @if (!string.IsNullOrEmpty(Model.Location))
                 {
                     <div class="col-md-6 mb-3">
-                        <div class="card">
-                            <div class="card-body">
-                                <h6 class="card-subtitle mb-2 text-muted">Ort</h6>
-                                <p class="mb-0">@Model.Location</p>
-                            </div>
+                        <div class="content-card card-base card-padding">
+                            <h6 class="mb-3 text-muted">Ort</h6>
+                            <p class="mb-0">@Model.Location</p>
                         </div>
                     </div>
                 }

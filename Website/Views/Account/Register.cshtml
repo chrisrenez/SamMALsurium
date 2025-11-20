@@ -3,12 +3,13 @@
     ViewData["Title"] = "Register";
 }
 
-<div class="container">
+<div class="container-xxl py-3">
     <div class="row justify-content-center">
         <div class="col-12 col-md-8 col-lg-6">
-            <h2 class="text-center mb-4">Create Your Account</h2>
+            <div class="content-card card-base card-padding">
+                <h2 class="text-center mb-4">Create Your Account</h2>
 
-            <form asp-action="Register" method="post" class="needs-validation" novalidate>
+                <form asp-action="Register" method="post" class="needs-validation" novalidate>
                 <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
 
                 <div class="mb-3">
@@ -46,10 +47,11 @@
                     <button type="submit" class="btn btn-primary btn-lg">Register</button>
                 </div>
 
-                <div class="text-center">
-                    <p>Already have an account? <a asp-action="Login">Sign in</a></p>
-                </div>
-            </form>
+                    <div class="text-center">
+                        <p>Already have an account? <a asp-action="Login">Sign in</a></p>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 </div>

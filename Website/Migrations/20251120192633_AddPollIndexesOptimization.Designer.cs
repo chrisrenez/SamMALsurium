@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SamMALsurium.Data;
 
@@ -11,9 +12,11 @@ using SamMALsurium.Data;
 namespace SamMALsurium.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251120192633_AddPollIndexesOptimization")]
+    partial class AddPollIndexesOptimization
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -311,7 +314,7 @@ namespace SamMALsurium.Migrations
                             Id = "1",
                             AccessFailedCount = 0,
                             AccountStatus = 0,
-                            ConcurrencyStamp = "21928cac-f014-48ab-8610-91ce2d63d72c",
+                            ConcurrencyStamp = "92b501c7-16b3-4f2e-98ac-5ca7c02e9650",
                             Email = "admin@sammalsurium.local",
                             EmailConfirmed = true,
                             EnablePollNotifications = true,
@@ -345,269 +348,31 @@ namespace SamMALsurium.Migrations
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Description")
+                        .HasMaxLength(5000)
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("EndDate")
+                    b.Property<DateTime?>("EndDate")
                         .HasColumnType("datetime2");
-
-                    b.Property<int>("EventTypeId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("ForumThreadId")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsPublic")
-                        .HasColumnType("bit");
-
-                    b.Property<double?>("Latitude")
-                        .HasColumnType("float");
 
                     b.Property<string>("Location")
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
-                    b.Property<string>("LocationName")
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<double?>("Longitude")
-                        .HasColumnType("float");
-
-                    b.Property<string>("OrganizedBy")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<bool>("RsvpEnabled")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime>("StartDate")
+                    b.Property<DateTime?>("StartDate")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("CreatedById");
 
-                    b.HasIndex("EventTypeId");
-
-                    b.HasIndex("IsActive");
-
-                    b.HasIndex("IsPublic");
-
-                    b.HasIndex("OrganizedBy");
-
                     b.HasIndex("StartDate");
 
-                    b.HasIndex("IsActive", "StartDate");
-
-                    b.HasIndex("IsPublic", "StartDate");
-
                     b.ToTable("Events");
-                });
-
-            modelBuilder.Entity("SamMALsurium.Models.EventAnnouncement", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("EventId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Message")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("SentAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("SentBy")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("EventId");
-
-                    b.HasIndex("SentAt");
-
-                    b.HasIndex("SentBy");
-
-                    b.ToTable("EventAnnouncements");
-                });
-
-            modelBuilder.Entity("SamMALsurium.Models.EventArtwork", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("ArtworkId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("EventId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ArtworkId");
-
-                    b.HasIndex("EventId");
-
-                    b.HasIndex("EventId", "ArtworkId")
-                        .IsUnique();
-
-                    b.ToTable("EventArtworks");
-                });
-
-            modelBuilder.Entity("SamMALsurium.Models.EventAttendee", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("EventId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("RsvpDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("RsvpStatus")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("RsvpStatus");
-
-                    b.HasIndex("UserId");
-
-                    b.HasIndex("EventId", "UserId")
-                        .IsUnique();
-
-                    b.ToTable("EventAttendees");
-                });
-
-            modelBuilder.Entity("SamMALsurium.Models.EventMedia", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("DisplayOrder")
-                        .HasColumnType("int");
-
-                    b.Property<int>("EventId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("FilePath")
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
-
-                    b.Property<int>("MediaType")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Url")
-                        .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("EventId");
-
-                    b.HasIndex("EventId", "DisplayOrder");
-
-                    b.ToTable("EventMedia");
-                });
-
-            modelBuilder.Entity("SamMALsurium.Models.EventType", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("EventTypes");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Description = "Hands-on learning sessions focused on specific artistic techniques or skills",
-                            Name = "Workshop"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Description = "Art shows and gallery exhibitions showcasing member artwork",
-                            Name = "Exhibition"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Description = "Informal gatherings for artists to connect and socialize",
-                            Name = "Meetup"
-                        },
-                        new
-                        {
-                            Id = 4,
-                            Description = "Virtual learning sessions and webinars",
-                            Name = "Online Class"
-                        },
-                        new
-                        {
-                            Id = 5,
-                            Description = "Constructive feedback sessions for artwork and creative projects",
-                            Name = "Critique Session"
-                        },
-                        new
-                        {
-                            Id = 6,
-                            Description = "Other types of events and gatherings",
-                            Name = "Other"
-                        });
                 });
 
             modelBuilder.Entity("SamMALsurium.Models.Image", b =>
@@ -1052,83 +817,7 @@ namespace SamMALsurium.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("SamMALsurium.Models.EventType", "EventType")
-                        .WithMany("Events")
-                        .HasForeignKey("EventTypeId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("SamMALsurium.Models.ApplicationUser", "Organizer")
-                        .WithMany()
-                        .HasForeignKey("OrganizedBy")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.Navigation("CreatedBy");
-
-                    b.Navigation("EventType");
-
-                    b.Navigation("Organizer");
-                });
-
-            modelBuilder.Entity("SamMALsurium.Models.EventAnnouncement", b =>
-                {
-                    b.HasOne("SamMALsurium.Models.Event", "Event")
-                        .WithMany("Announcements")
-                        .HasForeignKey("EventId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("SamMALsurium.Models.ApplicationUser", "Sender")
-                        .WithMany()
-                        .HasForeignKey("SentBy")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Event");
-
-                    b.Navigation("Sender");
-                });
-
-            modelBuilder.Entity("SamMALsurium.Models.EventArtwork", b =>
-                {
-                    b.HasOne("SamMALsurium.Models.Event", "Event")
-                        .WithMany("EventArtworks")
-                        .HasForeignKey("EventId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Event");
-                });
-
-            modelBuilder.Entity("SamMALsurium.Models.EventAttendee", b =>
-                {
-                    b.HasOne("SamMALsurium.Models.Event", "Event")
-                        .WithMany("Attendees")
-                        .HasForeignKey("EventId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("SamMALsurium.Models.ApplicationUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Event");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("SamMALsurium.Models.EventMedia", b =>
-                {
-                    b.HasOne("SamMALsurium.Models.Event", "Event")
-                        .WithMany("EventMedia")
-                        .HasForeignKey("EventId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Event");
                 });
 
             modelBuilder.Entity("SamMALsurium.Models.Image", b =>
@@ -1300,20 +989,7 @@ namespace SamMALsurium.Migrations
 
             modelBuilder.Entity("SamMALsurium.Models.Event", b =>
                 {
-                    b.Navigation("Announcements");
-
-                    b.Navigation("Attendees");
-
-                    b.Navigation("EventArtworks");
-
-                    b.Navigation("EventMedia");
-
                     b.Navigation("Polls");
-                });
-
-            modelBuilder.Entity("SamMALsurium.Models.EventType", b =>
-                {
-                    b.Navigation("Events");
                 });
 
             modelBuilder.Entity("SamMALsurium.Models.Poll", b =>

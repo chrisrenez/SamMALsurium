@@ -18,6 +18,11 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<AdminAuditLog> AdminAuditLogs { get; set; }
     public DbSet<Image> Images { get; set; }
     public DbSet<Event> Events { get; set; }
+    public DbSet<EventType> EventTypes { get; set; }
+    public DbSet<EventMedia> EventMedia { get; set; }
+    public DbSet<EventAttendee> EventAttendees { get; set; }
+    public DbSet<EventArtwork> EventArtworks { get; set; }
+    public DbSet<EventAnnouncement> EventAnnouncements { get; set; }
     public DbSet<Poll> Polls { get; set; }
     public DbSet<PollOption> PollOptions { get; set; }
     public DbSet<PollVote_MultipleChoice> PollVotes_MultipleChoice { get; set; }
@@ -65,10 +70,113 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             .OnDelete(DeleteBehavior.Restrict);
 
         builder.Entity<Event>()
+            .HasOne(e => e.Organizer)
+            .WithMany()
+            .HasForeignKey(e => e.OrganizedBy)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.Entity<Event>()
+            .HasOne(e => e.EventType)
+            .WithMany(et => et.Events)
+            .HasForeignKey(e => e.EventTypeId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        // Indexes for Event entity
+        builder.Entity<Event>()
             .HasIndex(e => e.CreatedById);
 
         builder.Entity<Event>()
             .HasIndex(e => e.StartDate);
+
+        builder.Entity<Event>()
+            .HasIndex(e => e.IsPublic);
+
+        builder.Entity<Event>()
+            .HasIndex(e => e.EventTypeId);
+
+        builder.Entity<Event>()
+            .HasIndex(e => e.OrganizedBy);
+
+        builder.Entity<Event>()
+            .HasIndex(e => e.IsActive);
+
+        // Composite indexes for common query patterns
+        builder.Entity<Event>()
+            .HasIndex(e => new { e.IsPublic, e.StartDate });
+
+        builder.Entity<Event>()
+            .HasIndex(e => new { e.IsActive, e.StartDate });
+
+        // Configure EventMedia relationships
+        builder.Entity<EventMedia>()
+            .HasOne(em => em.Event)
+            .WithMany(e => e.EventMedia)
+            .HasForeignKey(em => em.EventId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Entity<EventMedia>()
+            .HasIndex(em => em.EventId);
+
+        builder.Entity<EventMedia>()
+            .HasIndex(em => new { em.EventId, em.DisplayOrder });
+
+        // Configure EventAttendee relationships
+        builder.Entity<EventAttendee>()
+            .HasOne(ea => ea.Event)
+            .WithMany(e => e.Attendees)
+            .HasForeignKey(ea => ea.EventId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Entity<EventAttendee>()
+            .HasOne(ea => ea.User)
+            .WithMany()
+            .HasForeignKey(ea => ea.UserId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        // Uniqueness constraint: Each user can only have one RSVP per event
+        builder.Entity<EventAttendee>()
+            .HasIndex(ea => new { ea.EventId, ea.UserId })
+            .IsUnique();
+
+        builder.Entity<EventAttendee>()
+            .HasIndex(ea => ea.RsvpStatus);
+
+        // Configure EventArtwork relationships
+        builder.Entity<EventArtwork>()
+            .HasOne(ea => ea.Event)
+            .WithMany(e => e.EventArtworks)
+            .HasForeignKey(ea => ea.EventId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Entity<EventArtwork>()
+            .HasIndex(ea => ea.EventId);
+
+        builder.Entity<EventArtwork>()
+            .HasIndex(ea => ea.ArtworkId);
+
+        // Uniqueness constraint: Each artwork can only be linked to an event once
+        builder.Entity<EventArtwork>()
+            .HasIndex(ea => new { ea.EventId, ea.ArtworkId })
+            .IsUnique();
+
+        // Configure EventAnnouncement relationships
+        builder.Entity<EventAnnouncement>()
+            .HasOne(ea => ea.Event)
+            .WithMany(e => e.Announcements)
+            .HasForeignKey(ea => ea.EventId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Entity<EventAnnouncement>()
+            .HasOne(ea => ea.Sender)
+            .WithMany()
+            .HasForeignKey(ea => ea.SentBy)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.Entity<EventAnnouncement>()
+            .HasIndex(ea => ea.EventId);
+
+        builder.Entity<EventAnnouncement>()
+            .HasIndex(ea => ea.SentAt);
 
         // Configure Poll relationships
         builder.Entity<Poll>()
@@ -95,6 +203,16 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
 
         builder.Entity<Poll>()
             .HasIndex(p => p.CreatedAt);
+
+        builder.Entity<Poll>()
+            .HasIndex(p => p.EndDate);
+
+        // Composite indexes for common query patterns
+        builder.Entity<Poll>()
+            .HasIndex(p => new { p.Status, p.EndDate });
+
+        builder.Entity<Poll>()
+            .HasIndex(p => new { p.EventId, p.Status });
 
         // Configure PollOption relationships
         builder.Entity<PollOption>()
@@ -276,6 +394,46 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             {
                 RoleId = adminRoleId,
                 UserId = adminUserId
+            }
+        );
+
+        // Seed EventTypes
+        builder.Entity<EventType>().HasData(
+            new EventType
+            {
+                Id = 1,
+                Name = "Workshop",
+                Description = "Hands-on learning sessions focused on specific artistic techniques or skills"
+            },
+            new EventType
+            {
+                Id = 2,
+                Name = "Exhibition",
+                Description = "Art shows and gallery exhibitions showcasing member artwork"
+            },
+            new EventType
+            {
+                Id = 3,
+                Name = "Meetup",
+                Description = "Informal gatherings for artists to connect and socialize"
+            },
+            new EventType
+            {
+                Id = 4,
+                Name = "Online Class",
+                Description = "Virtual learning sessions and webinars"
+            },
+            new EventType
+            {
+                Id = 5,
+                Name = "Critique Session",
+                Description = "Constructive feedback sessions for artwork and creative projects"
+            },
+            new EventType
+            {
+                Id = 6,
+                Name = "Other",
+                Description = "Other types of events and gatherings"
             }
         );
     }

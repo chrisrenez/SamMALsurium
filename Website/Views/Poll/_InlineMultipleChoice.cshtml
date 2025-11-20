@@ -23,7 +23,7 @@
             </p>
         }
 
-        <div class="list-group">
+        <div class="list-group" role="group" aria-label="Abstimmungsoptionen">
             @foreach (var option in Model.Options)
             {
                 var isChecked = false;
@@ -39,29 +39,30 @@
                     }
                 }
 
-                <label class="list-group-item list-group-item-action" style="cursor: pointer;">
+                var inputId = $"option-{Model.Id}-{option.Id}";
+                <label class="list-group-item list-group-item-action" for="@inputId" style="cursor: pointer;">
                     <div class="d-flex align-items-start">
                         <div class="me-2 mt-1">
                             @if (inputType == "checkbox")
                             {
                                 if (isChecked)
                                 {
-                                    <input type="checkbox" name="options[]" value="@option.Id" class="form-check-input" checked>
+                                    <input type="checkbox" id="@inputId" name="options[]" value="@option.Id" class="form-check-input" aria-describedby="@inputId-desc" checked>
                                 }
                                 else
                                 {
-                                    <input type="checkbox" name="options[]" value="@option.Id" class="form-check-input">
+                                    <input type="checkbox" id="@inputId" name="options[]" value="@option.Id" class="form-check-input" aria-describedby="@inputId-desc">
                                 }
                             }
                             else
                             {
                                 if (isChecked)
                                 {
-                                    <input type="radio" name="options[]" value="@option.Id" class="form-check-input" checked>
+                                    <input type="radio" id="@inputId" name="options[]" value="@option.Id" class="form-check-input" aria-describedby="@inputId-desc" checked>
                                 }
                                 else
                                 {
-                                    <input type="radio" name="options[]" value="@option.Id" class="form-check-input">
+                                    <input type="radio" id="@inputId" name="options[]" value="@option.Id" class="form-check-input" aria-describedby="@inputId-desc">
                                 }
                             }
                         </div>
@@ -69,14 +70,14 @@
                             <div class="fw-bold">@option.Label</div>
                             @if (!string.IsNullOrEmpty(option.AdditionalInfo))
                             {
-                                <div class="text-muted small">@option.AdditionalInfo</div>
+                                <div class="text-muted small" id="@inputId-desc">@option.AdditionalInfo</div>
                             }
                         </div>
                     </div>
                 </label>
             }
         </div>
-        <div class="invalid-feedback d-none" id="validation-error-@Model.Id">
+        <div class="invalid-feedback d-none" id="validation-error-@Model.Id" role="alert" aria-live="polite">
             Bitte wählen Sie mindestens eine Option aus.
         </div>
     </div>

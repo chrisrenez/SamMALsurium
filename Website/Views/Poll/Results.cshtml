@@ -12,9 +12,9 @@
     };
 }
 
-<div class="container-xxl mt-4">
+<div class="container-xxl py-3">
     <!-- Breadcrumb -->
-    <nav aria-label="breadcrumb">
+    <nav aria-label="breadcrumb" class="mb-3">
         <ol class="breadcrumb">
             @if (Model.EventId.HasValue)
             {
@@ -30,8 +30,8 @@
     </nav>
 
     <!-- Results Header -->
-    <div class="card mb-4">
-        <div class="card-body">
+    <div class="content-card card-base card-padding mb-4">
+        <div>
             <div class="d-flex justify-content-between align-items-start flex-wrap mb-3">
                 <div>
                     <h1 class="h3 mb-2">@Model.Title</h1>
@@ -90,11 +90,11 @@
     </div>
 
     <!-- Results Display -->
-    <div class="card">
-        <div class="card-header">
-            <h5 class="mb-0">Abstimmungsergebnisse</h5>
+    <div class="content-card card-base card-padding">
+        <div>
+            <h5 class="mb-3">Abstimmungsergebnisse</h5>
         </div>
-        <div class="card-body">
+        <div>
             @if (Model.TotalParticipants == 0)
             {
                 <div class="alert alert-info">

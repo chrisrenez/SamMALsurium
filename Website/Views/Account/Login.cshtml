@@ -3,13 +3,14 @@
     ViewData["Title"] = "Login";
 }
 
-<div class="container">
+<div class="container-xxl py-3">
     <div class="row justify-content-center">
         <div class="col-12 col-md-8 col-lg-6">
-            <h2 class="text-center mb-4">Sign In</h2>
+            <div class="content-card card-base card-padding">
+                <h2 class="text-center mb-4">Sign In</h2>
 
-            <form asp-action="Login" asp-route-returnUrl="@ViewData["ReturnUrl"]" method="post" class="needs-validation" novalidate>
-                <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+                <form asp-action="Login" asp-route-returnUrl="@ViewData["ReturnUrl"]" method="post" class="needs-validation" novalidate>
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
 
                 <div class="mb-3">
                     <label asp-for="Email" class="form-label"></label>
@@ -32,10 +33,11 @@
                     <button type="submit" class="btn btn-primary btn-lg">Sign In</button>
                 </div>
 
-                <div class="text-center">
-                    <p>Don't have an account? <a asp-action="Register">Register now</a></p>
-                </div>
-            </form>
+                    <div class="text-center">
+                        <p>Don't have an account? <a asp-action="Register">Register now</a></p>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 </div>

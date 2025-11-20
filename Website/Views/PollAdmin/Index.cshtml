@@ -48,14 +48,14 @@
                                 </td>
                                 <td>
                                     <span class="badge bg-info">
-                                        @poll.Type.ToString() switch
+                                        @(poll.Type.ToString() switch
                                         {
                                             "MultipleChoice" => "Multiple Choice",
                                             "RankedChoice" => "Rangfolge",
                                             "ScoreVoting" => "Bewertung",
                                             "AvailabilityGrid" => "Verfügbarkeit",
                                             _ => poll.Type.ToString()
-                                        }
+                                        })
                                     </span>
                                 </td>
                                 <td>
@@ -153,14 +153,14 @@
                             </div>
                             <div class="mb-2">
                                 <span class="badge bg-info me-2">
-                                    @poll.Type.ToString() switch
+                                    @(poll.Type.ToString() switch
                                     {
                                         "MultipleChoice" => "Multiple Choice",
                                         "RankedChoice" => "Rangfolge",
                                         "ScoreVoting" => "Bewertung",
                                         "AvailabilityGrid" => "Verfügbarkeit",
                                         _ => poll.Type.ToString()
-                                    }
+                                    })
                                 </span>
                                 @if (poll.EventId.HasValue)
                                 {

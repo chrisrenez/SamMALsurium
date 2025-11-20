@@ -3,15 +3,13 @@
     ViewData["Title"] = "Image Library";
 }
 
-<div class="container">
-    <div class="row mb-4">
-        <div class="col">
-            <div class="d-flex justify-content-between align-items-center">
-                <h2>My Image Library</h2>
-                <a asp-action="Upload" asp-route-returnUrl="@Model.ReturnUrl" asp-route-contextId="@Model.ContextId" class="btn btn-primary">
-                    <i class="bi bi-plus-circle"></i> Upload New Image
-                </a>
-            </div>
+<div class="container-xxl py-3">
+    <div class="content-card card-base card-padding mb-4">
+        <div class="d-flex justify-content-between align-items-center">
+            <h2 class="mb-0">My Image Library</h2>
+            <a asp-action="Upload" asp-route-returnUrl="@Model.ReturnUrl" asp-route-contextId="@Model.ContextId" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> Upload New Image
+            </a>
         </div>
     </div>
 

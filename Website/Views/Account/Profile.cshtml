@@ -3,20 +3,21 @@
     ViewData["Title"] = "Profile";
 }
 
-<div class="container">
+<div class="container-xxl py-3">
     <div class="row justify-content-center">
         <div class="col-12 col-md-8 col-lg-6">
-            <h2 class="text-center mb-4">Your Profile</h2>
+            <div class="content-card card-base card-padding">
+                <h2 class="text-center mb-4">Your Profile</h2>
 
-            @if (TempData["SuccessMessage"] != null)
-            {
-                <div class="alert alert-success alert-dismissible fade show" role="alert">
-                    @TempData["SuccessMessage"]
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-            }
+                @if (TempData["SuccessMessage"] != null)
+                {
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        @TempData["SuccessMessage"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                }
 
-            <form asp-action="Profile" method="post" class="needs-validation" novalidate>
+                <form asp-action="Profile" method="post" class="needs-validation" novalidate>
                 <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
 
                 <div class="mb-3">
@@ -44,7 +45,8 @@
                 <div class="text-center">
                     <p><a asp-controller="Home" asp-action="Index">Back to Home</a></p>
                 </div>
-            </form>
+                </form>
+            </div>
         </div>
     </div>
 </div>

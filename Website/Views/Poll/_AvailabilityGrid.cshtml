@@ -14,17 +14,17 @@
         </p>
 
         <div class="table-responsive">
-            <table class="table table-bordered availability-grid-table">
+            <table class="table table-bordered availability-grid-table" role="grid" aria-label="Verfügbarkeitstabelle">
                 <thead>
-                    <tr>
-                        <th style="width: 40%;">Option</th>
-                        <th class="text-center" style="width: 20%;">
+                    <tr role="row">
+                        <th scope="col" style="width: 40%;">Option</th>
+                        <th scope="col" class="text-center" style="width: 20%;">
                             <span class="badge bg-success">Ja</span>
                         </th>
-                        <th class="text-center" style="width: 20%;">
+                        <th scope="col" class="text-center" style="width: 20%;">
                             <span class="badge bg-warning text-dark">Vielleicht</span>
                         </th>
-                        <th class="text-center" style="width: 20%;">
+                        <th scope="col" class="text-center" style="width: 20%;">
                             <span class="badge bg-danger">Nein</span>
                         </th>
                     </tr>
@@ -56,42 +56,42 @@
                             }
                         }
 
-                        <tr>
-                            <td>
+                        <tr role="row">
+                            <th scope="row">
                                 <div class="fw-bold">@option.Label</div>
                                 @if (!string.IsNullOrEmpty(option.AdditionalInfo))
                                 {
                                     <div class="text-muted small">@option.AdditionalInfo</div>
                                 }
-                            </td>
-                            <td class="text-center align-middle">
+                            </th>
+                            <td class="text-center align-middle" role="gridcell">
                                 @if (currentAvailability == "Yes")
                                 {
-                                    <input type="radio" name="availability_@option.Id" value="Yes" class="form-check-input" data-option-id="@option.Id" data-availability="yes" checked>
+                                    <input type="radio" id="availability-@option.Id-yes" name="availability_@option.Id" value="Yes" class="form-check-input" data-option-id="@option.Id" data-availability="yes" aria-label="Ja für @option.Label" checked>
                                 }
                                 else
                                 {
-                                    <input type="radio" name="availability_@option.Id" value="Yes" class="form-check-input" data-option-id="@option.Id" data-availability="yes">
+                                    <input type="radio" id="availability-@option.Id-yes" name="availability_@option.Id" value="Yes" class="form-check-input" data-option-id="@option.Id" data-availability="yes" aria-label="Ja für @option.Label">
                                 }
                             </td>
-                            <td class="text-center align-middle">
+                            <td class="text-center align-middle" role="gridcell">
                                 @if (currentAvailability == "Maybe")
                                 {
-                                    <input type="radio" name="availability_@option.Id" value="Maybe" class="form-check-input" data-option-id="@option.Id" data-availability="maybe" checked>
+                                    <input type="radio" id="availability-@option.Id-maybe" name="availability_@option.Id" value="Maybe" class="form-check-input" data-option-id="@option.Id" data-availability="maybe" aria-label="Vielleicht für @option.Label" checked>
                                 }
                                 else
                                 {
-                                    <input type="radio" name="availability_@option.Id" value="Maybe" class="form-check-input" data-option-id="@option.Id" data-availability="maybe">
+                                    <input type="radio" id="availability-@option.Id-maybe" name="availability_@option.Id" value="Maybe" class="form-check-input" data-option-id="@option.Id" data-availability="maybe" aria-label="Vielleicht für @option.Label">
                                 }
                             </td>
-                            <td class="text-center align-middle">
+                            <td class="text-center align-middle" role="gridcell">
                                 @if (currentAvailability == "No")
                                 {
-                                    <input type="radio" name="availability_@option.Id" value="No" class="form-check-input" data-option-id="@option.Id" data-availability="no" checked>
+                                    <input type="radio" id="availability-@option.Id-no" name="availability_@option.Id" value="No" class="form-check-input" data-option-id="@option.Id" data-availability="no" aria-label="Nein für @option.Label" checked>
                                 }
                                 else
                                 {
-                                    <input type="radio" name="availability_@option.Id" value="No" class="form-check-input" data-option-id="@option.Id" data-availability="no">
+                                    <input type="radio" id="availability-@option.Id-no" name="availability_@option.Id" value="No" class="form-check-input" data-option-id="@option.Id" data-availability="no" aria-label="Nein für @option.Label">
                                 }
                             </td>
                         </tr>

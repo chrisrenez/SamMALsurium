@@ -12,9 +12,9 @@
     };
 }
 
-<div class="container-xxl mt-4">
+<div class="container-xxl py-3">
     <!-- Breadcrumb -->
-    <nav aria-label="breadcrumb">
+    <nav aria-label="breadcrumb" class="mb-3">
         <ol class="breadcrumb">
             @if (Model.EventId.HasValue)
             {
@@ -29,8 +29,8 @@
     </nav>
 
     <!-- Poll Header -->
-    <div class="card mb-4">
-        <div class="card-body">
+    <div class="content-card card-base card-padding mb-4">
+        <div>
             <div class="d-flex justify-content-between align-items-start flex-wrap mb-3">
                 <div>
                     <h1 class="h3 mb-2">@Model.Title</h1>
@@ -107,11 +107,11 @@
     @if (Model.CanVote && !Model.HasUserVoted)
     {
         <!-- Show voting interface -->
-        <div class="card mb-4">
-            <div class="card-header">
-                <h5 class="mb-0">Abstimmen</h5>
+        <div class="content-card card-base card-padding mb-4">
+            <div>
+                <h5 class="mb-3">Abstimmen</h5>
             </div>
-            <div class="card-body">
+            <div>
                 @if (Model.Type == PollType.MultipleChoice)
                 {
                     @await Html.PartialAsync("_InlineMultipleChoice", Model)
@@ -134,11 +134,11 @@
     else if (Model.CanVote && Model.HasUserVoted && Model.CanChangeVote)
     {
         <!-- Show change vote interface -->
-        <div class="card mb-4">
-            <div class="card-header bg-warning bg-opacity-10">
-                <h5 class="mb-0">Stimme ändern</h5>
+        <div class="content-card card-base card-padding mb-4 border border-warning">
+            <div>
+                <h5 class="mb-3">Stimme ändern</h5>
             </div>
-            <div class="card-body">
+            <div>
                 <div class="alert alert-info">
                     <i class="bi bi-info-circle"></i> Sie haben bereits abgestimmt. Sie können Ihre Stimme ändern oder zurückziehen.
                 </div>
@@ -196,14 +196,14 @@
     <!-- Results Section -->
     @if (Model.CanViewResults)
     {
-        <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center">
+        <div class="content-card card-base card-padding">
+            <div class="d-flex justify-content-between align-items-center mb-3">
                 <h5 class="mb-0">Ergebnisse</h5>
                 <a href="@Url.Action("Results", new { id = Model.Id })" class="btn btn-sm btn-primary">
                     <i class="bi bi-bar-chart"></i> Detaillierte Ergebnisse
                 </a>
             </div>
-            <div class="card-body">
+            <div>
                 <p class="text-muted">
                     Klicken Sie auf "Detaillierte Ergebnisse", um die vollständigen Abstimmungsergebnisse zu sehen.
                 </p>

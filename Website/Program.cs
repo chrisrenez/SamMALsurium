@@ -72,6 +72,9 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
+// Register image privacy middleware after authentication/authorization
+app.UseMiddleware<ImagePrivacyMiddleware>();
+
 // Register maintenance mode middleware after authentication/authorization
 app.UseMiddleware<MaintenanceModeMiddleware>();
 

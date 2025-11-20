@@ -198,4 +198,41 @@ public class ImagesController : Controller
 
         return RedirectToAction(nameof(Library));
     }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> UpdatePrivacy(int imageId, ImagePrivacyLevel privacy)
+    {
+        var userId = _userManager.GetUserId(User);
+        if (userId == null)
+        {
+            return Unauthorized();
+        }
+
+        // Find the image and validate user owns it
+        var image = await _context.Images
+            .Where(i => i.ImageId == imageId && i.UserId == userId)
+            .FirstOrDefaultAsync();
+
+        if (image == null)
+        {
+            _logger.LogWarning("User {UserId} attempted to update privacy for image {ImageId} they don't own", userId, imageId);
+            return NotFound();
+        }
+
+        // Update privacy level
+        image.Privacy = privacy;
+        await _context.SaveChangesAsync();
+
+        _logger.LogInformation("User {UserId} updated privacy for image {ImageId} to {Privacy}", userId, imageId, privacy);
+
+        // Return JSON for AJAX requests
+        if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+        {
+            return Json(new { success = true, privacy = privacy.ToString() });
+        }
+
+        // Redirect to library for normal form submission
+        return RedirectToAction(nameof(Library));
+    }
 }

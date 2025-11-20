@@ -95,6 +95,34 @@
             </div>
         }
 
+        <!-- Privacy Control -->
+        @if (!isSelectionMode && Model.ProcessingStatus == ImageProcessingStatus.Ready)
+        {
+            <div class="mb-2">
+                <form asp-controller="Images" asp-action="UpdatePrivacy" method="post" class="privacy-form" data-image-id="@Model.ImageId">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="imageId" value="@Model.ImageId" />
+                    <div class="input-group input-group-sm">
+                        <label class="input-group-text" for="privacy-@Model.ImageId">
+                            <i class="bi bi-shield-lock"></i>
+                        </label>
+                        <select name="privacy" id="privacy-@Model.ImageId" class="form-select form-select-sm" onchange="this.form.submit()">
+                            @if (Model.Privacy == ImagePrivacyLevel.CommunityOnly)
+                            {
+                                <option value="0" selected>Community Only</option>
+                                <option value="1">Public Profile</option>
+                            }
+                            else
+                            {
+                                <option value="0">Community Only</option>
+                                <option value="1" selected>Public Profile</option>
+                            }
+                        </select>
+                    </div>
+                </form>
+            </div>
+        }
+
         <!-- Actions -->
         <div class="d-flex gap-2">
             @if (isSelectionMode && Model.ProcessingStatus == ImageProcessingStatus.Ready)

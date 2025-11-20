@@ -1,9 +1,181 @@
-﻿@{
-    ViewData["Title"] = "SamMALsurium";
-    Layout = "_LayoutInit";
+@{
+    ViewData["Title"] = "Willkommen";
+    Layout = "_Layout";
 }
 
-<div style="display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 100vh;">
-    <img src="~/img/brand/logo_large.png" alt="SamMALsurium Logo" style="max-width: 500px; margin-bottom: 30px;" />
-    <h1 style="color: #B64D3F;">Nur noch wenige Tage ...</h1>
+<div class="container-xxl py-3">
+    <!-- Hero Carousel -->
+    <div id="hero-carousel" class="hero-carousel" role="region" aria-label="Hero carousel" aria-live="polite">
+        <!-- Slides Container -->
+        <div class="carousel-slides">
+            <!-- Slide 1 -->
+            <div class="carousel-slide active" data-slide-index="0">
+                <div class="hero-card">
+                    <div class="hero-content">
+                        <h1 class="hero-heading">Nicht allein malen.<br>Gemeinsam erleben.</h1>
+                        <p class="hero-text">SamMALsurium vereint Bildende KünstlerInnen aus Oberösterreich. Wir malen gemeinsam unter freiem Himmel, teilen Eindrücke, Ideen – und den Genuss guter Gespräche bei Kaffee und Essen.</p>
+                        <p class="hero-text">SamMALsurium vereint Bildende KünstlerInnen aus Oberösterreich. Wir malen gemeinsam unter freiem Himmel, teilen Eindrücke, Ideen – und den Genuss guter Gespräche bei Kaffee und Essen.</p>
+                        <div class="hero-buttons">
+                            <a href="#gemeinsam-malen" class="btn btn-outline-primary hero-btn">Jetzt mehr erfahren</a>
+                            <a href="/auth/register" class="btn btn-primary hero-btn">Jetzt registrieren</a>
+                        </div>
+                    </div>
+                    <div class="hero-image">
+                        <img src="~/img/hero/placeholders/hero_01.png" alt="SamMALsurium - Gemeinsam malen" />
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 2 -->
+            <div class="carousel-slide" data-slide-index="1">
+                <div class="hero-card">
+                    <div class="hero-content">
+                        <h1 class="hero-heading">Nicht nur zeigen,<br/>gemeinsam wachsen.</h1>
+                        <p class="hero-text">Teile deine Werke mit der SamMALsurium-Community, hole dir konstruktives Feedback und inspiriere andere. Du entscheidest, ob dein Bild nur innerhalb der Gemeinschaft sichtbar ist oder öffentlich präsentiert wird.</p>
+                        <p class="hero-text">Teile deine Werke mit der SamMALsurium-Community, hole dir konstruktives Feedback und inspiriere andere. Du entscheidest, ob dein Bild nur innerhalb der Gemeinschaft sichtbar ist oder öffentlich präsentiert wird.</p>
+                        <div class="hero-buttons">
+                            <a href="#gemeinsam-wachsen" class="btn btn-outline-primary hero-btn">Jetzt mehr erfahren</a>
+                            <a href="/auth/register" class="btn btn-primary hero-btn">Jetzt registrieren</a>
+                        </div>
+                    </div>
+                    <div class="hero-image">
+                        <img src="~/img/hero/placeholders/hero_02.png" alt="SamMALsurium - Gemeinsam malen" />
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 3 -->
+            <div class="carousel-slide" data-slide-index="2">
+                <div class="hero-card">
+                    <div class="hero-content">
+                        <h1 class="hero-heading">Nicht nur probieren,<br/>gemeinsam lernen</h1>
+                        <p class="hero-text">In der SamMALsurium Akademie teilen KünstlerInnen ihr Wissen in kostenlosen Webinaren, Zoom-Calls und Video-Tutorials – ein Ort, um Techniken zu entdecken, voneinander zu lernen und gemeinsam zu wachsen.</p>
+                        <p class="hero-text">In der SamMALsurium Akademie teilen KünstlerInnen ihr Wissen in kostenlosen Webinaren, Zoom-Calls und Video-Tutorials – ein Ort, um Techniken zu entdecken, voneinander zu lernen und gemeinsam zu wachsen.</p>
+                        <div class="hero-buttons">
+                            <a href="#gemeinsam-lernen" class="btn btn-outline-primary hero-btn">Jetzt mehr erfahren</a>
+                            <a href="/auth/register" class="btn btn-primary hero-btn">Jetzt registrieren</a>
+                        </div>
+                    </div>
+                    <div class="hero-image">
+                        <img src="~/img/hero/placeholders/hero_03.png" alt="SamMALsurium - Gemeinsam malen" />
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 4 -->
+            <div class="carousel-slide" data-slide-index="3">
+                <div class="hero-card">
+                    <div class="hero-content">
+                        <h1 class="hero-heading">Nicht nur reden,<br/>gemeinsam verstehen</h1>
+                        <p class="hero-text">Diskutiere mit anderen KünstlerInnen über Materialien, Techniken und Ideen. Im Forum von SamMALsurium kannst du Fragen stellen, Wissen teilen und gemeinsam neue Perspektiven entdecken.</p>
+                        <p class="hero-text">Diskutiere mit anderen KünstlerInnen über Materialien, Techniken und Ideen. Im Forum von SamMALsurium kannst du Fragen stellen, Wissen teilen und gemeinsam neue Perspektiven entdecken.</p>
+                        <div class="hero-buttons">
+                            <a href="#gemeinsam-verstehen" class="btn btn-outline-primary hero-btn">Jetzt mehr erfahren</a>
+                            <a href="/auth/register" class="btn btn-primary hero-btn">Jetzt registrieren</a>
+                        </div>
+                    </div>
+                    <div class="hero-image">
+                        <img src="~/img/hero/placeholders/hero_04.png" alt="SamMALsurium - Gemeinsam malen" />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation Arrows -->
+        <button class="carousel-arrow carousel-arrow-left" aria-label="Previous slide">
+            <i class="bi bi-arrow-left-circle-fill"></i>
+        </button>
+        <button class="carousel-arrow carousel-arrow-right" aria-label="Next slide">
+            <i class="bi bi-arrow-right-circle-fill"></i>
+        </button>
+
+        <!-- Indicator Dots -->
+        <div class="carousel-indicators">
+            <button class="carousel-dot active" aria-label="Go to slide 1" aria-current="true"
+                data-slide-index="0"></button>
+            <button class="carousel-dot" aria-label="Go to slide 2" data-slide-index="1"></button>
+            <button class="carousel-dot" aria-label="Go to slide 3" data-slide-index="2"></button>
+            <button class="carousel-dot" aria-label="Go to slide 4" data-slide-index="3"></button>
+        </div>
+    </div>
 </div>
+
+<div class="container-xxl py-3" id="gemeinsam-malen">
+    <div class="content-card card-base card-padding">
+        <h2 class="heading-responsive">Nicht allein malen, gemeinsam erleben</h2>
+        <p class="">Malen ist oft eine stille, einsame Tätigkeit – konzentriert, versunken, ganz bei sich. Doch manchmal entsteht die größte Inspiration im Austausch mit anderen. SamMALsurium bringt bildende KünstlerInnen aus Oberösterreich zusammen, die das Malen im Freien lieben und dabei Gemeinschaft, Gespräch und gegenseitige Anregung suchen.</p>
+        <p>Einmal im Monat treffen wir uns zum gemeinsamen Malen unter freiem Himmel. Die Orte dafür werden von allen Mitgliedern vorgeschlagen und gemeinsam abgestimmt – ganz basisdemokratisch. Ob Stadtplatz, Flussufer oder Wiese mit Aussicht: Jede Stimme zählt, und jede neue Umgebung bringt frische Motive und Begegnungen.</p>
+        <p>Wir organisieren uns frei und unkompliziert: Wer Mitfahrgelegenheiten braucht oder selbst anbieten kann, findet über die Plattform leicht Anschluss. Nach dem Malen sitzen wir meist noch zusammen – bei Kaffee, Essen und Gesprächen über Kunst, Techniken und das Leben.</p>
+        <p class="">SamMALsurium ist kein Verein, keine Institution und keine Verpflichtung.</p>
+        <p>Es gibt keine Mitgliedsbeiträge, keine formelle Anmeldung, nur den Wunsch, Kunst gemeinsam zu erleben. Jede und jeder bringt das ein, was sie oder er möchte – Zeit, Ideen, Erfahrung, Begeisterung.</p>
+        <p>Wenn du Freude am Malen im Freien hast und Gleichgesinnte suchst, bist du bei SamMALsurium genau richtig.</p>
+        <p>Nicht allein malen – gemeinsam erleben.</p>
+        <div class="">
+            <a class="btn btn-primary" href="/auth/register">Jetzt registrieren</a>
+        </div>
+    </div>
+</div>
+<div class="container-xxl py-3" id="gemeinsam-wachsen">
+    <div class="content-card card-base card-padding">
+        <h2 class="heading-responsive">Nicht nur zeigen, gemeinsam wachsen</h2>
+        <p>In SamMALsurium geht es nicht um Likes, Algorithmen oder Reichweite – sondern um ehrlichen Austausch unter KünstlerInnen.</p>
+        <p>Hier kannst du deine Werke hochladen, Feedback erhalten und anderen zeigen, woran du arbeitest – ob draußen im Freien, im Atelier oder zuhause.</p>
+        <p>Beim Hochladen entscheidest du selbst, welche Art von Rückmeldung du möchtest:
+- Konstruktives Feedback, wenn du an deiner Technik oder Komposition arbeiten möchtest,
+- oder einfach nur Anerkennung und Austausch, wenn du dein Werk zeigen willst, ohne es zu diskutieren.</p>
+        <p>Alle Bilder im SamMALsurium sind geschützt: Nur angemeldete Mitglieder können sie sehen, und sie sind nicht für Suchmaschinen oder KI-Systeme zugänglich.
+</p>
+        <p>So bleibt deine Kunst dein geistiges Eigentum – sichtbar nur für die, denen du vertraust.</p>
+        <p>Wenn du möchtest, kannst du einzelne Werke öffentlich freigeben, um sie auch außerhalb der Community zu zeigen. Diese Bilder erscheinen dann zum Beispiel in der öffentlichen Galerie auf der Startseite.
+</p>
+        <p>SamMALsurium verbindet die Freiheit des Teilens mit der Sicherheit des geschützten Raums – für eine Gemeinschaft, in der Kunst wachsen darf.</p>
+        <div class="">
+            <a class="btn btn-primary" href="/auth/register">Jetzt registrieren</a>
+        </div>
+    </div>
+</div>
+<div class="container-xxl py-3" id="gemeinsam-lernen">
+    <div class="content-card card-base card-padding">
+        <h2 class="heading-responsive">Nicht nur probieren, gemeinsam lernen.</h2>
+        <p>In der SamMALsurium Akademie steht das gemeinsame Lernen im Mittelpunkt. Hier findest du Webinare, Zoom-Calls und Video-Tutorials, in denen erfahrene KünstlerInnen ihr Wissen teilen – von grundlegenden Techniken der Aquarellmalerei bis hin zu speziellen Themen wie Farbwirkung, Lichtführung oder Komposition.</p>
+        <p>Alle Inhalte entstehen aus der Gemeinschaft heraus: Mitglieder bieten Workshops an, teilen Erfahrungen oder geben Einblicke in ihre eigenen Arbeitsprozesse. So entsteht ein lebendiger Wissensraum, in dem jede Frage willkommen ist und jedes Erfahrungsniveau seinen Platz hat.</p>
+        <p>Die Akademie ist kein kommerzielles Angebot, sondern Teil der offenen Idee von SamMALsurium.
+Es gibt keine Kosten, keine Verpflichtungen, nur die Freude am Entdecken, Ausprobieren und Wachsen – gemeinsam mit anderen.</p>
+        <p>Ob du gerade erst beginnst oder schon viele Jahre malst: In der Akademie findest du Anregung, Austausch und Unterstützung, um deinen eigenen künstlerischen Weg weiterzuentwickeln.
+Hier wird aus Neugier Können – und aus gemeinsamem Lernen Inspiration.</p>
+        <div class="">
+            <a class="btn btn-primary" href="/auth/register">Jetzt registrieren</a>
+        </div>
+    </div>
+</div>
+
+<div class="container-xxl py-3" id="gemeinsam-verstehen">
+    <div class="content-card card-base card-padding">
+        <h2 class="heading-responsive">Nicht nur reden, gemeinsam verstehen</h2>
+        <p>Das Forum ist das Herz des Austauschs im SamMALsurium. Hier treffen sich KünstlerInnen, um miteinander zu sprechen, Erfahrungen zu teilen und voneinander zu lernen.</p>
+        <p>Ob es um Farben, Papier, Pinsel oder Komposition geht – im Forum kannst du Fragen stellen, Tipps geben oder einfach mitlesen und Inspiration finden. Die Beiträge sind thematisch gegliedert, damit du dich leicht zurechtfindest und schnell in die Themen einsteigen kannst, die dich interessieren.</p>
+        <p>Das Forum bietet auch die Möglichkeit, Abstimmungen einzubinden – etwa um gemeinsam über Themen, Orte oder Aktivitäten abzustimmen. So wird der Dialog nicht nur zum Austausch, sondern auch zur gemeinsamen Gestaltung der Community.</p>
+        <p>Wie alles im SamMALsurium ist auch das Forum frei von Werbung, Algorithmen und Konkurrenzdenken. Es geht um offene Gespräche, gegenseitige Unterstützung und das gemeinsame Verstehen künstlerischer Prozesse – von MalerInnen, für MalerInnen.</p>
+        <div class="">
+            <a class="btn btn-primary" href="/auth/register">Jetzt registrieren</a>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script type="module">
+        import HeroCarousel from '/js/UI/HeroCarousel.js';
+
+        // Initialize carousel when DOM is ready
+        document.addEventListener('DOMContentLoaded', () => {
+            const carousel = new HeroCarousel('#hero-carousel', {
+                interval: 10000,        // 10 seconds auto-advance
+                transitionSpeed: 500,   // 500ms slide transition
+                pauseOnHover: false     // Don't pause on hover by default
+            });
+
+            carousel.init();
+            console.log('Hero carousel initialized');
+        });
+    </script>
+}

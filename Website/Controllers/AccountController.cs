@@ -1,7 +1,9 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using SamMALsurium.Models;
+using SamMALsurium.Models.Configuration;
 using SamMALsurium.Models.Enums;
 using SamMALsurium.Models.ViewModels;
 using SamMALsurium.Services;
@@ -15,19 +17,22 @@ public class AccountController : Controller
     private readonly ILogger<AccountController> _logger;
     private readonly IConfiguration _configuration;
     private readonly IEmailService _emailService;
+    private readonly IOptions<ApplicationSettings> _applicationSettings;
 
     public AccountController(
         UserManager<ApplicationUser> userManager,
         SignInManager<ApplicationUser> signInManager,
         ILogger<AccountController> logger,
         IConfiguration configuration,
-        IEmailService emailService)
+        IEmailService emailService,
+        IOptions<ApplicationSettings> applicationSettings)
     {
         _userManager = userManager;
         _signInManager = signInManager;
         _logger = logger;
         _configuration = configuration;
         _emailService = emailService;
+        _applicationSettings = applicationSettings;
     }
 
     [HttpGet]
@@ -178,6 +183,25 @@ public class AccountController : Controller
             _logger.LogInformation(
                 "User logged in successfully. Email: {Email}, UserId: {UserId}, IP: {IpAddress}, Timestamp: {Timestamp}, RememberMe: {RememberMe}",
                 user?.Email, user?.Id, ipAddress, DateTime.UtcNow, model.RememberMe);
+
+            // Check if maintenance mode is active
+            if (_applicationSettings.Value.IsMaintenanceMode)
+            {
+                // Check if user is admin
+                var isAdmin = await _userManager.IsInRoleAsync(user!, "Admin");
+
+                if (!isAdmin)
+                {
+                    // Sign out non-admin user and redirect to maintenance page
+                    await _signInManager.SignOutAsync();
+
+                    _logger.LogWarning(
+                        "Non-admin user attempted to login during maintenance mode. Email: {Email}, UserId: {UserId}, IP: {IpAddress}, Timestamp: {Timestamp}",
+                        user?.Email, user?.Id, ipAddress, DateTime.UtcNow);
+
+                    return RedirectToAction("Maintenance", "Home");
+                }
+            }
 
             // Prevent open redirect attacks
             if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))

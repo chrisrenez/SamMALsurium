@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using SamMALsurium.Data;
+using SamMALsurium.Middleware;
 using SamMALsurium.Models;
 using SamMALsurium.Models.Configuration;
 using SamMALsurium.Services;
@@ -62,11 +63,14 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
+// Register maintenance mode middleware after authentication/authorization
+app.UseMiddleware<MaintenanceModeMiddleware>();
+
 app.MapStaticAssets();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Landing}/{id?}")
+    pattern: "{controller=Home}/{action=Index}/{id?}")
     .WithStaticAssets();
 
 

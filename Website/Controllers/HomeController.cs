@@ -1,16 +1,20 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using SamMALsurium.Models;
+using SamMALsurium.Models.Configuration;
 
 namespace SamMALsurium.Controllers;
 
 public class HomeController : Controller
 {
     private readonly ILogger<HomeController> _logger;
+    private readonly ApplicationSettings _applicationSettings;
 
-    public HomeController(ILogger<HomeController> logger)
+    public HomeController(ILogger<HomeController> logger, IOptions<ApplicationSettings> applicationSettings)
     {
         _logger = logger;
+        _applicationSettings = applicationSettings.Value;
     }
 
     public IActionResult Index()
@@ -18,12 +22,13 @@ public class HomeController : Controller
         return View();
     }
 
-    public IActionResult Overview()
+    public IActionResult Maintenance()
     {
+        ViewBag.MaintenanceMessage = _applicationSettings.MaintenanceMessage;
         return View();
     }
 
-    public IActionResult Landing()
+    public IActionResult Overview()
     {
         return View();
     }

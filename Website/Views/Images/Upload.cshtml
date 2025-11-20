@@ -45,6 +45,7 @@
                     </div>
                     <input type="file" asp-for="ImageFile" class="d-none" id="fileInput" accept=".jpg,.jpeg,.png,.gif,image/jpeg,image/png,image/gif" />
                     <span asp-validation-for="ImageFile" class="text-danger"></span>
+                    <div id="validationError" class="alert alert-danger mt-2 d-none" role="alert"></div>
                 </div>
 
                 <!-- Privacy Selection -->
@@ -100,84 +101,20 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
-    <script>
-        // Client-side upload handling will be added via TypeScript in task 5.0
-        // For now, basic file input functionality is provided
+    <script type="module" src="~/js/Images/ImageUpload.js" asp-append-version="true"></script>
+    <script type="module">
+        import { initializeUpload } from '/js/Images/ImageUpload.js';
         document.addEventListener('DOMContentLoaded', function() {
-            const dropZone = document.getElementById('dropZone');
-            const fileInput = document.getElementById('fileInput');
-            const selectFileBtn = document.getElementById('selectFileBtn');
-            const dropZoneContent = document.getElementById('dropZoneContent');
-            const imagePreview = document.getElementById('imagePreview');
-            const previewImg = document.getElementById('previewImg');
-            const fileName = document.getElementById('fileName');
-            const fileSize = document.getElementById('fileSize');
-            const removeImageBtn = document.getElementById('removeImageBtn');
-
-            // Click to select file
-            selectFileBtn.addEventListener('click', () => fileInput.click());
-            dropZone.addEventListener('click', function(e) {
-                if (e.target !== removeImageBtn && !removeImageBtn.contains(e.target)) {
-                    fileInput.click();
-                }
-            });
-
-            // File input change
-            fileInput.addEventListener('change', handleFileSelect);
-
-            // Drag and drop
-            dropZone.addEventListener('dragover', function(e) {
-                e.preventDefault();
-                dropZone.classList.add('border-primary', 'bg-light');
-            });
-
-            dropZone.addEventListener('dragleave', function(e) {
-                e.preventDefault();
-                dropZone.classList.remove('border-primary', 'bg-light');
-            });
-
-            dropZone.addEventListener('drop', function(e) {
-                e.preventDefault();
-                dropZone.classList.remove('border-primary', 'bg-light');
-
-                const files = e.dataTransfer.files;
-                if (files.length > 0) {
-                    fileInput.files = files;
-                    handleFileSelect();
-                }
-            });
-
-            // Remove image
-            removeImageBtn.addEventListener('click', function(e) {
-                e.stopPropagation();
-                fileInput.value = '';
-                dropZoneContent.classList.remove('d-none');
-                imagePreview.classList.add('d-none');
-            });
-
-            function handleFileSelect() {
-                const file = fileInput.files[0];
-                if (!file) return;
-
-                // Show preview
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    previewImg.src = e.target.result;
-                    fileName.textContent = file.name;
-                    fileSize.textContent = formatFileSize(file.size);
-                    dropZoneContent.classList.add('d-none');
-                    imagePreview.classList.remove('d-none');
-                };
-                reader.readAsDataURL(file);
-            }
-
-            function formatFileSize(bytes) {
-                if (bytes === 0) return '0 Bytes';
-                const k = 1024;
-                const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-                const i = Math.floor(Math.log(bytes) / Math.log(k));
-                return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
-            }
+            initializeUpload();
         });
     </script>
+    <style>
+        #dropZone.drag-over {
+            border-color: var(--bs-primary) !important;
+            background-color: var(--bs-light) !important;
+        }
+        #dropZone.has-image {
+            border-color: var(--bs-success) !important;
+        }
+    </style>
 }

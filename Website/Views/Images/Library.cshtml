@@ -47,7 +47,11 @@
 </div>
 
 @section Scripts {
-    <script>
-        // Image library interaction handling will be added via TypeScript in task 5.0
+    <script type="module" src="~/js/Images/ImageLibrary.js" asp-append-version="true"></script>
+    <script type="module">
+        import { initializeLibrary } from '/js/Images/ImageLibrary.js';
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeLibrary();
+        });
     </script>
 }

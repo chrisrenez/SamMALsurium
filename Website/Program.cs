@@ -50,6 +50,9 @@ builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("Emai
 // Configure image storage settings
 builder.Services.Configure<ImageStorageSettings>(builder.Configuration.GetSection("ImageStorageSettings"));
 
+// Configure event settings
+builder.Services.Configure<EventSettings>(builder.Configuration.GetSection("EventSettings"));
+
 // Register email service
 builder.Services.AddScoped<IEmailService, EmailService>();
 
@@ -63,6 +66,9 @@ builder.Services.AddHostedService<ImageProcessingBackgroundService>();
 builder.Services.AddScoped<SamMALsurium.Services.Polls.IPollService, SamMALsurium.Services.Polls.PollService>();
 builder.Services.AddScoped<SamMALsurium.Services.Polls.IVoteService, SamMALsurium.Services.Polls.VoteService>();
 builder.Services.AddHostedService<PollLifecycleBackgroundService>();
+
+// Register event services
+builder.Services.AddScoped<IEventService, EventService>();
 
 var app = builder.Build();
 

@@ -1,0 +1,183 @@
+@model ImageUploadViewModel
+@{
+    ViewData["Title"] = "Upload Image";
+}
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-8">
+            <h2 class="text-center mb-4">Upload Image</h2>
+
+            @if (!string.IsNullOrEmpty(Model.ReturnUrl))
+            {
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle"></i> After uploading, you'll return to your previous page.
+                </div>
+            }
+
+            <form asp-action="Upload" method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                <input type="hidden" asp-for="ReturnUrl" />
+                <input type="hidden" asp-for="ContextId" />
+
+                <!-- Drag and Drop Zone -->
+                <div class="mb-4">
+                    <label class="form-label fw-bold">Select Image</label>
+                    <div id="dropZone" class="border border-2 border-dashed rounded p-4 text-center" style="min-height: 200px; cursor: pointer; transition: all 0.3s;">
+                        <div id="dropZoneContent">
+                            <i class="bi bi-cloud-upload fs-1 text-muted"></i>
+                            <p class="mt-3 mb-2">Drag and drop your image here</p>
+                            <p class="text-muted small">or</p>
+                            <button type="button" class="btn btn-outline-primary" id="selectFileBtn">
+                                <i class="bi bi-folder2-open"></i> Browse Files
+                            </button>
+                            <p class="text-muted small mt-3">Supported formats: JPEG, PNG, GIF (Max 25MB)</p>
+                        </div>
+                        <div id="imagePreview" class="d-none">
+                            <img id="previewImg" src="" alt="Preview" class="img-fluid rounded mb-2" style="max-height: 300px;">
+                            <p id="fileName" class="mb-1"></p>
+                            <p id="fileSize" class="text-muted small"></p>
+                            <button type="button" class="btn btn-sm btn-outline-danger" id="removeImageBtn">
+                                <i class="bi bi-x-circle"></i> Remove
+                            </button>
+                        </div>
+                    </div>
+                    <input type="file" asp-for="ImageFile" class="d-none" id="fileInput" accept=".jpg,.jpeg,.png,.gif,image/jpeg,image/png,image/gif" />
+                    <span asp-validation-for="ImageFile" class="text-danger"></span>
+                </div>
+
+                <!-- Privacy Selection -->
+                <div class="mb-4">
+                    <label class="form-label fw-bold">Privacy Level</label>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" asp-for="Privacy" value="@ImagePrivacyLevel.CommunityOnly" id="privacyCommunity" checked />
+                        <label class="form-check-label" for="privacyCommunity">
+                            <strong>Community Only</strong>
+                            <span class="d-block text-muted small">Visible only to logged-in community members</span>
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" asp-for="Privacy" value="@ImagePrivacyLevel.PublicProfile" id="privacyPublic" />
+                        <label class="form-check-label" for="privacyPublic">
+                            <strong>Public Profile</strong>
+                            <span class="d-block text-muted small">Can be visible on public-facing profile pages</span>
+                        </label>
+                    </div>
+                    <span asp-validation-for="Privacy" class="text-danger"></span>
+                </div>
+
+                <!-- Tags -->
+                <div class="mb-4">
+                    <label asp-for="Tags" class="form-label fw-bold"></label>
+                    <input asp-for="Tags" class="form-control" placeholder="landscape, oil painting, 2024" />
+                    <div class="form-text">Optional: Separate tags with commas</div>
+                    <span asp-validation-for="Tags" class="text-danger"></span>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                    @if (!string.IsNullOrEmpty(Model.ReturnUrl))
+                    {
+                        <a href="@Model.ReturnUrl" class="btn btn-outline-secondary">
+                            <i class="bi bi-x-circle"></i> Cancel
+                        </a>
+                    }
+                    else
+                    {
+                        <a asp-action="Library" class="btn btn-outline-secondary">
+                            <i class="bi bi-x-circle"></i> Cancel
+                        </a>
+                    }
+                    <button type="submit" class="btn btn-primary" id="uploadBtn">
+                        <i class="bi bi-upload"></i> Upload Image
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        // Client-side upload handling will be added via TypeScript in task 5.0
+        // For now, basic file input functionality is provided
+        document.addEventListener('DOMContentLoaded', function() {
+            const dropZone = document.getElementById('dropZone');
+            const fileInput = document.getElementById('fileInput');
+            const selectFileBtn = document.getElementById('selectFileBtn');
+            const dropZoneContent = document.getElementById('dropZoneContent');
+            const imagePreview = document.getElementById('imagePreview');
+            const previewImg = document.getElementById('previewImg');
+            const fileName = document.getElementById('fileName');
+            const fileSize = document.getElementById('fileSize');
+            const removeImageBtn = document.getElementById('removeImageBtn');
+
+            // Click to select file
+            selectFileBtn.addEventListener('click', () => fileInput.click());
+            dropZone.addEventListener('click', function(e) {
+                if (e.target !== removeImageBtn && !removeImageBtn.contains(e.target)) {
+                    fileInput.click();
+                }
+            });
+
+            // File input change
+            fileInput.addEventListener('change', handleFileSelect);
+
+            // Drag and drop
+            dropZone.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                dropZone.classList.add('border-primary', 'bg-light');
+            });
+
+            dropZone.addEventListener('dragleave', function(e) {
+                e.preventDefault();
+                dropZone.classList.remove('border-primary', 'bg-light');
+            });
+
+            dropZone.addEventListener('drop', function(e) {
+                e.preventDefault();
+                dropZone.classList.remove('border-primary', 'bg-light');
+
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    fileInput.files = files;
+                    handleFileSelect();
+                }
+            });
+
+            // Remove image
+            removeImageBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                fileInput.value = '';
+                dropZoneContent.classList.remove('d-none');
+                imagePreview.classList.add('d-none');
+            });
+
+            function handleFileSelect() {
+                const file = fileInput.files[0];
+                if (!file) return;
+
+                // Show preview
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewImg.src = e.target.result;
+                    fileName.textContent = file.name;
+                    fileSize.textContent = formatFileSize(file.size);
+                    dropZoneContent.classList.add('d-none');
+                    imagePreview.classList.remove('d-none');
+                };
+                reader.readAsDataURL(file);
+            }
+
+            function formatFileSize(bytes) {
+                if (bytes === 0) return '0 Bytes';
+                const k = 1024;
+                const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+            }
+        });
+    </script>
+}

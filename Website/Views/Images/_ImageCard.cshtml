@@ -1,0 +1,133 @@
+@model ImageItemViewModel
+@{
+    var returnUrl = ViewData["ReturnUrl"] as string;
+    var contextId = ViewData["ContextId"] as int?;
+    var isSelectionMode = !string.IsNullOrEmpty(returnUrl);
+}
+
+<div class="card h-100 shadow-sm @(isSelectionMode ? "image-card-selectable" : "")" data-image-id="@Model.ImageId">
+    <div class="position-relative">
+        @if (Model.ProcessingStatus == ImageProcessingStatus.Ready && !string.IsNullOrEmpty(Model.ThumbnailUrl))
+        {
+            <img src="@Model.ThumbnailUrl" class="card-img-top" alt="@Model.ImageId" style="height: 200px; object-fit: cover;" />
+        }
+        else if (Model.ProcessingStatus == ImageProcessingStatus.Processing)
+        {
+            <div class="card-img-top d-flex align-items-center justify-content-center bg-light" style="height: 200px;">
+                <div class="text-center">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Processing...</span>
+                    </div>
+                    <p class="mt-2 text-muted small">Processing...</p>
+                </div>
+            </div>
+        }
+        else if (Model.ProcessingStatus == ImageProcessingStatus.Uploading)
+        {
+            <div class="card-img-top d-flex align-items-center justify-content-center bg-light" style="height: 200px;">
+                <div class="text-center">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Uploading...</span>
+                    </div>
+                    <p class="mt-2 text-muted small">Uploading...</p>
+                </div>
+            </div>
+        }
+        else if (Model.ProcessingStatus == ImageProcessingStatus.Error)
+        {
+            <div class="card-img-top d-flex align-items-center justify-content-center bg-danger bg-opacity-10" style="height: 200px;">
+                <div class="text-center text-danger">
+                    <i class="bi bi-exclamation-triangle fs-1"></i>
+                    <p class="mt-2 small">Processing Error</p>
+                </div>
+            </div>
+        }
+
+        <!-- Privacy Badge -->
+        <div class="position-absolute top-0 end-0 m-2">
+            @if (Model.Privacy == ImagePrivacyLevel.CommunityOnly)
+            {
+                <span class="badge bg-secondary">
+                    <i class="bi bi-people-fill"></i> Community
+                </span>
+            }
+            else
+            {
+                <span class="badge bg-info">
+                    <i class="bi bi-globe"></i> Public
+                </span>
+            }
+        </div>
+
+        <!-- Status Badge -->
+        @if (Model.ProcessingStatus == ImageProcessingStatus.Ready)
+        {
+            <div class="position-absolute top-0 start-0 m-2">
+                <span class="badge bg-success">
+                    <i class="bi bi-check-circle"></i> Ready
+                </span>
+            </div>
+        }
+    </div>
+
+    <div class="card-body">
+        <!-- Upload Date -->
+        <p class="card-text text-muted small mb-2">
+            <i class="bi bi-calendar"></i> @Model.UploadedAt.ToString("MMM d, yyyy")
+        </p>
+
+        <!-- Tags -->
+        @if (!string.IsNullOrEmpty(Model.Tags))
+        {
+            <div class="mb-2">
+                @foreach (var tag in Model.Tags.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).Take(3))
+                {
+                    <span class="badge bg-light text-dark border me-1">@tag</span>
+                }
+            </div>
+        }
+
+        <!-- Error Message -->
+        @if (Model.ProcessingStatus == ImageProcessingStatus.Error && !string.IsNullOrEmpty(Model.ErrorMessage))
+        {
+            <div class="alert alert-danger alert-sm py-1 px-2 small mb-2">
+                @Model.ErrorMessage
+            </div>
+        }
+
+        <!-- Actions -->
+        <div class="d-flex gap-2">
+            @if (isSelectionMode && Model.ProcessingStatus == ImageProcessingStatus.Ready)
+            {
+                <form asp-controller="Images" asp-action="SelectFromLibrary" method="post" class="flex-grow-1">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="imageId" value="@Model.ImageId" />
+                    <input type="hidden" name="returnUrl" value="@returnUrl" />
+                    <button type="submit" class="btn btn-primary btn-sm w-100">
+                        <i class="bi bi-check2"></i> Select
+                    </button>
+                </form>
+            }
+            else if (Model.ProcessingStatus == ImageProcessingStatus.Ready)
+            {
+                <a href="@Model.HighResUrl" target="_blank" class="btn btn-outline-primary btn-sm flex-grow-1">
+                    <i class="bi bi-eye"></i> View
+                </a>
+            }
+        </div>
+    </div>
+</div>
+
+@if (isSelectionMode)
+{
+    <style>
+        .image-card-selectable {
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .image-card-selectable:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 .5rem 1rem rgba(0,0,0,.15) !important;
+        }
+    </style>
+}

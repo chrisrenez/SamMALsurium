@@ -50,6 +50,12 @@ builder.Services.Configure<ImageStorageSettings>(builder.Configuration.GetSectio
 // Register email service
 builder.Services.AddScoped<IEmailService, EmailService>();
 
+// Register image services
+builder.Services.AddScoped<IImageStorageService, ImageStorageService>();
+builder.Services.AddScoped<IImageProcessingService, ImageProcessingService>();
+builder.Services.AddSingleton<ImageProcessingQueueService>();
+builder.Services.AddHostedService<ImageProcessingBackgroundService>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

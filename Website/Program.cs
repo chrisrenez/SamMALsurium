@@ -44,6 +44,9 @@ builder.Services.Configure<ApplicationSettings>(builder.Configuration.GetSection
 // Configure email settings
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
 
+// Configure image storage settings
+builder.Services.Configure<ImageStorageSettings>(builder.Configuration.GetSection("ImageStorageSettings"));
+
 // Register email service
 builder.Services.AddScoped<IEmailService, EmailService>();
 

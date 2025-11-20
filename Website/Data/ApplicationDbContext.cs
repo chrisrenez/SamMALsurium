@@ -16,6 +16,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     }
 
     public DbSet<AdminAuditLog> AdminAuditLogs { get; set; }
+    public DbSet<Image> Images { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -33,6 +34,20 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             .WithMany()
             .HasForeignKey(a => a.TargetUserId)
             .OnDelete(DeleteBehavior.SetNull);
+
+        // Configure Image relationships
+        builder.Entity<Image>()
+            .HasOne(i => i.User)
+            .WithMany()
+            .HasForeignKey(i => i.UserId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        // Create indexes for Image entity
+        builder.Entity<Image>()
+            .HasIndex(i => i.UserId);
+
+        builder.Entity<Image>()
+            .HasIndex(i => i.UploadedAt);
 
         // Seed roles
         var adminRoleId = "1";

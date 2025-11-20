@@ -1,0 +1,129 @@
+@model PollResultsViewModel
+
+@{
+    ViewData["Title"] = "Ergebnisse: " + Model.Title;
+    var pollTypeName = Model.Type switch
+    {
+        PollType.MultipleChoice => "Multiple Choice",
+        PollType.RankedChoice => "Rangfolge",
+        PollType.ScoreVoting => "Bewertung",
+        PollType.AvailabilityGrid => "Verfügbarkeit",
+        _ => Model.Type.ToString()
+    };
+}
+
+<div class="container-xxl mt-4">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            @if (Model.EventId.HasValue)
+            {
+                <li class="breadcrumb-item"><a href="@Url.Action("Details", "Event", new { id = Model.EventId })">@Model.EventTitle</a></li>
+            }
+            else
+            {
+                <li class="breadcrumb-item"><a href="@Url.Action("Index", "Home")">Home</a></li>
+            }
+            <li class="breadcrumb-item"><a href="@Url.Action("Details", new { id = Model.PollId })">@Model.Title</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Ergebnisse</li>
+        </ol>
+    </nav>
+
+    <!-- Results Header -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start flex-wrap mb-3">
+                <div>
+                    <h1 class="h3 mb-2">@Model.Title</h1>
+                    <div class="d-flex gap-2 flex-wrap">
+                        <span class="badge bg-secondary">@pollTypeName</span>
+                        @if (Model.Status == PollStatus.Active)
+                        {
+                            <span class="badge bg-success">Aktiv</span>
+                        }
+                        else if (Model.Status == PollStatus.Closed)
+                        {
+                            <span class="badge bg-secondary">Geschlossen</span>
+                        }
+                        else if (Model.Status == PollStatus.Archived)
+                        {
+                            <span class="badge bg-dark">Archiviert</span>
+                        }
+                    </div>
+                </div>
+                <div>
+                    @if (Model.CanExportResults)
+                    {
+                        <a href="@Url.Action("ExportResults", "PollAdmin", new { id = Model.PollId })" class="btn btn-outline-primary">
+                            <i class="bi bi-download"></i> CSV exportieren
+                        </a>
+                    }
+                    <a href="@Url.Action("Details", new { id = Model.PollId })" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left"></i> Zurück zur Umfrage
+                    </a>
+                </div>
+            </div>
+
+            @if (!string.IsNullOrEmpty(Model.Description))
+            {
+                <p class="mb-3">@Model.Description</p>
+            }
+
+            <div class="row text-muted small">
+                <div class="col-md-6 mb-2">
+                    <i class="bi bi-people"></i> <strong>@Model.TotalParticipants</strong> @(Model.TotalParticipants == 1 ? "Teilnehmer" : "Teilnehmer")
+                </div>
+                @if (Model.EndDate.HasValue)
+                {
+                    <div class="col-md-6 mb-2">
+                        <i class="bi bi-calendar-x"></i> Beendet: @Model.EndDate.Value.ToLocalTime().ToString("dd.MM.yyyy HH:mm")
+                    </div>
+                }
+                @if (Model.IsAnonymous)
+                {
+                    <div class="col-md-12 mb-2">
+                        <i class="bi bi-incognito"></i> Anonyme Abstimmung - Einzelne Stimmen werden nicht angezeigt
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Results Display -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">Abstimmungsergebnisse</h5>
+        </div>
+        <div class="card-body">
+            @if (Model.TotalParticipants == 0)
+            {
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle"></i> Es wurden noch keine Stimmen abgegeben.
+                </div>
+            }
+            else
+            {
+                @if (Model.Type == PollType.MultipleChoice)
+                {
+                    @await Html.PartialAsync("_Results_MultipleChoice", Model)
+                }
+                else if (Model.Type == PollType.RankedChoice)
+                {
+                    @await Html.PartialAsync("_Results_RankedChoice", Model)
+                }
+                else if (Model.Type == PollType.ScoreVoting)
+                {
+                    @await Html.PartialAsync("_Results_ScoreVoting", Model)
+                }
+                else if (Model.Type == PollType.AvailabilityGrid)
+                {
+                    @await Html.PartialAsync("_Results_AvailabilityGrid", Model)
+                }
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script type="module" src="~/js/Polls/PollResults.js"></script>
+}

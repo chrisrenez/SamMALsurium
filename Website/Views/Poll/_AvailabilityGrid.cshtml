@@ -1,0 +1,115 @@
+@model PollDetailsViewModel
+
+@{
+    var actionName = Model.HasUserVoted ? "ChangeVote" : "Vote";
+    var buttonText = Model.HasUserVoted ? "Stimme aktualisieren" : "Abstimmen";
+}
+
+<form asp-action="@actionName" asp-route-id="@Model.Id" method="post" class="availability-grid-form" id="poll-form-@Model.Id">
+    @Html.AntiForgeryToken()
+
+    <div class="mb-3">
+        <p class="text-muted small mb-3">
+            <i class="bi bi-info-circle"></i> Markieren Sie Ihre Verfügbarkeit für jede Option.
+        </p>
+
+        <div class="table-responsive">
+            <table class="table table-bordered availability-grid-table">
+                <thead>
+                    <tr>
+                        <th style="width: 40%;">Option</th>
+                        <th class="text-center" style="width: 20%;">
+                            <span class="badge bg-success">Ja</span>
+                        </th>
+                        <th class="text-center" style="width: 20%;">
+                            <span class="badge bg-warning text-dark">Vielleicht</span>
+                        </th>
+                        <th class="text-center" style="width: 20%;">
+                            <span class="badge bg-danger">Nein</span>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var option in Model.Options)
+                    {
+                        var currentAvailability = "No";
+                        if (Model.UserVote != null && Model.UserVote is IDictionary<string, object> voteDict)
+                        {
+                            if (voteDict.ContainsKey("Availability"))
+                            {
+                                var availabilities = voteDict["Availability"] as IEnumerable<object>;
+                                if (availabilities != null)
+                                {
+                                    foreach (var availObj in availabilities)
+                                    {
+                                        var availDict = availObj as IDictionary<string, object>;
+                                        if (availDict != null && availDict.ContainsKey("OptionId") && availDict.ContainsKey("Availability"))
+                                        {
+                                            if (availDict["OptionId"].ToString() == option.Id.ToString())
+                                            {
+                                                currentAvailability = availDict["Availability"].ToString();
+                                                break;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        <tr>
+                            <td>
+                                <div class="fw-bold">@option.Label</div>
+                                @if (!string.IsNullOrEmpty(option.AdditionalInfo))
+                                {
+                                    <div class="text-muted small">@option.AdditionalInfo</div>
+                                }
+                            </td>
+                            <td class="text-center align-middle">
+                                @if (currentAvailability == "Yes")
+                                {
+                                    <input type="radio" name="availability_@option.Id" value="Yes" class="form-check-input" data-option-id="@option.Id" data-availability="yes" checked>
+                                }
+                                else
+                                {
+                                    <input type="radio" name="availability_@option.Id" value="Yes" class="form-check-input" data-option-id="@option.Id" data-availability="yes">
+                                }
+                            </td>
+                            <td class="text-center align-middle">
+                                @if (currentAvailability == "Maybe")
+                                {
+                                    <input type="radio" name="availability_@option.Id" value="Maybe" class="form-check-input" data-option-id="@option.Id" data-availability="maybe" checked>
+                                }
+                                else
+                                {
+                                    <input type="radio" name="availability_@option.Id" value="Maybe" class="form-check-input" data-option-id="@option.Id" data-availability="maybe">
+                                }
+                            </td>
+                            <td class="text-center align-middle">
+                                @if (currentAvailability == "No")
+                                {
+                                    <input type="radio" name="availability_@option.Id" value="No" class="form-check-input" data-option-id="@option.Id" data-availability="no" checked>
+                                }
+                                else
+                                {
+                                    <input type="radio" name="availability_@option.Id" value="No" class="form-check-input" data-option-id="@option.Id" data-availability="no">
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="d-flex gap-2">
+        <button type="submit" class="btn btn-primary">
+            <i class="bi bi-check-circle"></i> @buttonText
+        </button>
+        @if (Model.EventId.HasValue)
+        {
+            <a href="@Url.Action("Details", "Event", new { id = Model.EventId })" class="btn btn-outline-secondary">
+                Abbrechen
+            </a>
+        }
+    </div>
+</form>

@@ -1,0 +1,181 @@
+@model PollResultsViewModel
+
+@{
+    var results = new List<dynamic>();
+    if (Model.Results.ContainsKey("results"))
+    {
+        var resultsObj = Model.Results["results"] as IEnumerable<object>;
+        if (resultsObj != null)
+        {
+            results = resultsObj.Cast<dynamic>().ToList();
+        }
+    }
+}
+
+@if (results.Any())
+{
+    <div class="results-availability-grid">
+        <div class="alert alert-info mb-4">
+            <i class="bi bi-info-circle"></i>
+            Die Optionen sind nach Anzahl "Ja"-Stimmen sortiert (höhere Anzahl = mehr Verfügbarkeit).
+        </div>
+
+        <!-- Heat map visualization -->
+        <div class="table-responsive mb-4">
+            <table class="table table-bordered table-hover">
+                <thead>
+                    <tr>
+                        <th style="width: 40%;">Option</th>
+                        <th class="text-center" style="width: 15%;">
+                            <span class="badge bg-success">Ja</span>
+                        </th>
+                        <th class="text-center" style="width: 15%;">
+                            <span class="badge bg-warning text-dark">Vielleicht</span>
+                        </th>
+                        <th class="text-center" style="width: 15%;">
+                            <span class="badge bg-danger">Nein</span>
+                        </th>
+                        <th class="text-center" style="width: 15%;">
+                            Gesamt
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var result in results.OrderByDescending(r => (int)(r.YesCount ?? 0)))
+                    {
+                        var optionId = (int)(result.OptionId ?? 0);
+                        var optionLabel = (string)(result.OptionLabel ?? "");
+                        var yesCount = (int)(result.YesCount ?? 0);
+                        var maybeCount = (int)(result.MaybeCount ?? 0);
+                        var noCount = (int)(result.NoCount ?? 0);
+                        var totalResponses = (int)(result.TotalResponses ?? 0);
+
+                        var yesPercentage = totalResponses > 0 ? (yesCount * 100.0m / totalResponses) : 0;
+                        var maybePercentage = totalResponses > 0 ? (maybeCount * 100.0m / totalResponses) : 0;
+                        var noPercentage = totalResponses > 0 ? (noCount * 100.0m / totalResponses) : 0;
+
+                        // Determine background color based on yes count
+                        var rowClass = "";
+                        if (totalResponses > 0)
+                        {
+                            if (yesPercentage >= 75)
+                            {
+                                rowClass = "table-success";
+                            }
+                            else if (yesPercentage >= 50)
+                            {
+                                rowClass = "table-warning";
+                            }
+                        }
+
+                        <tr class="@rowClass">
+                            <td>
+                                <strong>@optionLabel</strong>
+                            </td>
+                            <td class="text-center">
+                                <div class="fw-bold">@yesCount</div>
+                                <div class="small text-muted">@yesPercentage.ToString("F0")%</div>
+                            </td>
+                            <td class="text-center">
+                                <div class="fw-bold">@maybeCount</div>
+                                <div class="small text-muted">@maybePercentage.ToString("F0")%</div>
+                            </td>
+                            <td class="text-center">
+                                <div class="fw-bold">@noCount</div>
+                                <div class="small text-muted">@noPercentage.ToString("F0")%</div>
+                            </td>
+                            <td class="text-center">
+                                <strong>@totalResponses</strong>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Detailed results per option -->
+        @if (!Model.IsAnonymous)
+        {
+            <h6 class="mb-3">Detaillierte Antworten</h6>
+
+            @foreach (var result in results.OrderByDescending(r => (int)(r.YesCount ?? 0)))
+            {
+                var optionId = (int)(result.OptionId ?? 0);
+                var optionLabel = (string)(result.OptionLabel ?? "");
+                var voterAvailability = result.VoterAvailability as IEnumerable<dynamic>;
+
+                @if (voterAvailability != null && voterAvailability.Any())
+                {
+                    <div class="card mb-3">
+                        <div class="card-header">
+                            <h6 class="mb-0">@optionLabel</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                @{
+                                    var yesVoters = voterAvailability.Where(v => v.Availability.ToString() == "Yes").ToList();
+                                    var maybeVoters = voterAvailability.Where(v => v.Availability.ToString() == "Maybe").ToList();
+                                    var noVoters = voterAvailability.Where(v => v.Availability.ToString() == "No").ToList();
+                                }
+
+                                @if (yesVoters.Any())
+                                {
+                                    <div class="col-md-4 mb-3">
+                                        <div class="d-flex align-items-center mb-2">
+                                            <span class="badge bg-success me-2">Ja</span>
+                                            <span class="small text-muted">(@yesVoters.Count)</span>
+                                        </div>
+                                        <ul class="list-unstyled small">
+                                            @foreach (var voter in yesVoters)
+                                            {
+                                                <li><i class="bi bi-person-check text-success"></i> @voter.VoterName</li>
+                                            }
+                                        </ul>
+                                    </div>
+                                }
+
+                                @if (maybeVoters.Any())
+                                {
+                                    <div class="col-md-4 mb-3">
+                                        <div class="d-flex align-items-center mb-2">
+                                            <span class="badge bg-warning text-dark me-2">Vielleicht</span>
+                                            <span class="small text-muted">(@maybeVoters.Count)</span>
+                                        </div>
+                                        <ul class="list-unstyled small">
+                                            @foreach (var voter in maybeVoters)
+                                            {
+                                                <li><i class="bi bi-person-dash text-warning"></i> @voter.VoterName</li>
+                                            }
+                                        </ul>
+                                    </div>
+                                }
+
+                                @if (noVoters.Any())
+                                {
+                                    <div class="col-md-4 mb-3">
+                                        <div class="d-flex align-items-center mb-2">
+                                            <span class="badge bg-danger me-2">Nein</span>
+                                            <span class="small text-muted">(@noVoters.Count)</span>
+                                        </div>
+                                        <ul class="list-unstyled small">
+                                            @foreach (var voter in noVoters)
+                                            {
+                                                <li><i class="bi bi-person-x text-danger"></i> @voter.VoterName</li>
+                                            }
+                                        </ul>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+        }
+    </div>
+}
+else
+{
+    <div class="alert alert-info">
+        <i class="bi bi-info-circle"></i> Keine Ergebnisse verfügbar.
+    </div>
+}

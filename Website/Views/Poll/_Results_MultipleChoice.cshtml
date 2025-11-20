@@ -1,0 +1,70 @@
+@model PollResultsViewModel
+
+@{
+    var results = new List<dynamic>();
+    if (Model.Results.ContainsKey("results"))
+    {
+        var resultsObj = Model.Results["results"] as IEnumerable<object>;
+        if (resultsObj != null)
+        {
+            results = resultsObj.Cast<dynamic>().ToList();
+        }
+    }
+}
+
+@if (results.Any())
+{
+    <div class="results-multiple-choice">
+        @foreach (var result in results.OrderByDescending(r => (int)(r.VoteCount ?? 0)))
+        {
+            var optionId = (int)(result.OptionId ?? 0);
+            var optionLabel = (string)(result.OptionLabel ?? "");
+            var voteCount = (int)(result.VoteCount ?? 0);
+            var percentage = (decimal)(result.Percentage ?? 0);
+            var voterNames = result.VoterNames as IEnumerable<string>;
+
+            <div class="mb-4 result-item" data-option-id="@optionId">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h6 class="mb-0">@optionLabel</h6>
+                    <span class="badge bg-primary">@voteCount @(voteCount == 1 ? "Stimme" : "Stimmen")</span>
+                </div>
+
+                <div class="progress mb-2" style="height: 30px;">
+                    <div class="progress-bar progress-bar-striped bg-primary"
+                         role="progressbar"
+                         style="width: @percentage.ToString("F1")%"
+                         aria-valuenow="@percentage"
+                         aria-valuemin="0"
+                         aria-valuemax="100">
+                        @percentage.ToString("F1")%
+                    </div>
+                </div>
+
+                @if (!Model.IsAnonymous && voterNames != null && voterNames.Any())
+                {
+                    <div class="voter-details">
+                        <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#voters-@optionId">
+                            <i class="bi bi-people"></i> Wähler anzeigen (@voterNames.Count())
+                        </button>
+                        <div class="collapse mt-2" id="voters-@optionId">
+                            <div class="card card-body bg-light">
+                                <ul class="list-unstyled mb-0 small">
+                                    @foreach (var voterName in voterNames)
+                                    {
+                                        <li><i class="bi bi-person"></i> @voterName</li>
+                                    }
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+}
+else
+{
+    <div class="alert alert-info">
+        <i class="bi bi-info-circle"></i> Keine Ergebnisse verfügbar.
+    </div>
+}

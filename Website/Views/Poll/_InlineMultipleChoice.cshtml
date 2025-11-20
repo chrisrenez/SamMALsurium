@@ -1,0 +1,95 @@
+@model PollDetailsViewModel
+
+@{
+    var actionName = Model.HasUserVoted ? "ChangeVote" : "Vote";
+    var buttonText = Model.HasUserVoted ? "Stimme aktualisieren" : "Abstimmen";
+    var inputType = Model.IsMultiSelect == true ? "checkbox" : "radio";
+}
+
+<form asp-action="@actionName" asp-route-id="@Model.Id" method="post" class="multiple-choice-form" id="poll-form-@Model.Id">
+    @Html.AntiForgeryToken()
+
+    <div class="mb-3">
+        @if (Model.IsMultiSelect == true)
+        {
+            <p class="text-muted small mb-3">
+                <i class="bi bi-info-circle"></i> Sie können mehrere Optionen auswählen.
+            </p>
+        }
+        else
+        {
+            <p class="text-muted small mb-3">
+                <i class="bi bi-info-circle"></i> Bitte wählen Sie eine Option aus.
+            </p>
+        }
+
+        <div class="list-group">
+            @foreach (var option in Model.Options)
+            {
+                var isChecked = false;
+                if (Model.UserVote != null && Model.UserVote is IDictionary<string, object> voteDict)
+                {
+                    if (voteDict.ContainsKey("SelectedOptions"))
+                    {
+                        var selectedOptions = voteDict["SelectedOptions"] as IEnumerable<object>;
+                        if (selectedOptions != null)
+                        {
+                            isChecked = selectedOptions.Any(o => o.ToString() == option.Id.ToString());
+                        }
+                    }
+                }
+
+                <label class="list-group-item list-group-item-action" style="cursor: pointer;">
+                    <div class="d-flex align-items-start">
+                        <div class="me-2 mt-1">
+                            @if (inputType == "checkbox")
+                            {
+                                if (isChecked)
+                                {
+                                    <input type="checkbox" name="options[]" value="@option.Id" class="form-check-input" checked>
+                                }
+                                else
+                                {
+                                    <input type="checkbox" name="options[]" value="@option.Id" class="form-check-input">
+                                }
+                            }
+                            else
+                            {
+                                if (isChecked)
+                                {
+                                    <input type="radio" name="options[]" value="@option.Id" class="form-check-input" checked>
+                                }
+                                else
+                                {
+                                    <input type="radio" name="options[]" value="@option.Id" class="form-check-input">
+                                }
+                            }
+                        </div>
+                        <div class="flex-grow-1">
+                            <div class="fw-bold">@option.Label</div>
+                            @if (!string.IsNullOrEmpty(option.AdditionalInfo))
+                            {
+                                <div class="text-muted small">@option.AdditionalInfo</div>
+                            }
+                        </div>
+                    </div>
+                </label>
+            }
+        </div>
+        <div class="invalid-feedback d-none" id="validation-error-@Model.Id">
+            Bitte wählen Sie mindestens eine Option aus.
+        </div>
+    </div>
+
+    <div class="d-flex gap-2">
+        <button type="submit" class="btn btn-primary">
+            <i class="bi bi-check-circle"></i> @buttonText
+        </button>
+        @if (Model.EventId.HasValue)
+        {
+            <a href="@Url.Action("Details", "Event", new { id = Model.EventId })" class="btn btn-outline-secondary">
+                Abbrechen
+            </a>
+        }
+    </div>
+</form>

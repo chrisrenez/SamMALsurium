@@ -1,0 +1,93 @@
+@model PollResultsViewModel
+
+@{
+    var results = new List<dynamic>();
+    if (Model.Results.ContainsKey("results"))
+    {
+        var resultsObj = Model.Results["results"] as IEnumerable<object>;
+        if (resultsObj != null)
+        {
+            results = resultsObj.Cast<dynamic>().ToList();
+        }
+    }
+}
+
+@if (results.Any())
+{
+    <div class="results-ranked-choice">
+        <div class="alert alert-info mb-4">
+            <i class="bi bi-info-circle"></i>
+            Die Optionen sind nach durchschnittlichem Rang sortiert (niedrigerer Rang = besser bewertet).
+        </div>
+
+        @foreach (var result in results.OrderBy(r => (decimal)(r.AverageRank ?? 999)))
+        {
+            var optionId = (int)(result.OptionId ?? 0);
+            var optionLabel = (string)(result.OptionLabel ?? "");
+            var averageRank = (decimal)(result.AverageRank ?? 0);
+            var totalRankings = (int)(result.TotalRankings ?? 0);
+            var rankCounts = result.RankCounts as IDictionary<string, object>;
+            var voterRankings = result.VoterRankings as IEnumerable<dynamic>;
+
+            <div class="card mb-3 result-item" data-option-id="@optionId">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <h6 class="mb-1">@optionLabel</h6>
+                            <div class="text-muted small">
+                                Durchschnittlicher Rang: <strong>@averageRank.ToString("F2")</strong>
+                            </div>
+                        </div>
+                        <span class="badge bg-primary">@totalRankings Rankings</span>
+                    </div>
+
+                    @if (rankCounts != null && rankCounts.Any())
+                    {
+                        <div class="mb-3">
+                            <div class="small text-muted mb-2">Rangverteilung:</div>
+                            <div class="d-flex flex-wrap gap-2">
+                                @foreach (var rankPair in rankCounts.OrderBy(kvp => int.Parse(kvp.Key)))
+                                {
+                                    var rank = int.Parse(rankPair.Key);
+                                    var count = Convert.ToInt32(rankPair.Value);
+                                    <span class="badge bg-secondary">
+                                        Rang @rank: @count @(count == 1 ? "Mal" : "Mal")
+                                    </span>
+                                }
+                            </div>
+                        </div>
+                    }
+
+                    @if (!Model.IsAnonymous && voterRankings != null && voterRankings.Any())
+                    {
+                        <div class="voter-details">
+                            <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#voters-@optionId">
+                                <i class="bi bi-people"></i> Wähler-Rankings anzeigen
+                            </button>
+                            <div class="collapse mt-2" id="voters-@optionId">
+                                <div class="card card-body bg-light">
+                                    <ul class="list-unstyled mb-0 small">
+                                        @foreach (var ranking in voterRankings.OrderBy(r => (int)(r.Rank ?? 0)))
+                                        {
+                                            var voterName = (string)(ranking.VoterName ?? "");
+                                            var rank = (int)(ranking.Rank ?? 0);
+                                            <li>
+                                                <i class="bi bi-person"></i> @voterName: Rang <strong>@rank</strong>
+                                            </li>
+                                        }
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+}
+else
+{
+    <div class="alert alert-info">
+        <i class="bi bi-info-circle"></i> Keine Ergebnisse verfügbar.
+    </div>
+}

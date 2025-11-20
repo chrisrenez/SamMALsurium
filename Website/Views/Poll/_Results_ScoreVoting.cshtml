@@ -1,0 +1,138 @@
+@model PollResultsViewModel
+
+@{
+    var results = new List<dynamic>();
+    if (Model.Results.ContainsKey("results"))
+    {
+        var resultsObj = Model.Results["results"] as IEnumerable<object>;
+        if (resultsObj != null)
+        {
+            results = resultsObj.Cast<dynamic>().ToList();
+        }
+    }
+}
+
+@if (results.Any())
+{
+    <div class="results-score-voting">
+        <div class="alert alert-info mb-4">
+            <i class="bi bi-info-circle"></i>
+            Die Optionen sind nach durchschnittlicher Bewertung sortiert (höhere Punktzahl = besser bewertet).
+        </div>
+
+        @foreach (var result in results.OrderByDescending(r => (decimal)(r.AverageScore ?? 0)))
+        {
+            var optionId = (int)(result.OptionId ?? 0);
+            var optionLabel = (string)(result.OptionLabel ?? "");
+            var averageScore = (decimal)(result.AverageScore ?? 0);
+            var standardDeviation = result.StandardDeviation != null ? (decimal?)Convert.ToDecimal(result.StandardDeviation) : null;
+            var totalScores = (int)(result.TotalScores ?? 0);
+            var scoreDistribution = result.ScoreDistribution as IDictionary<string, object>;
+            var voterScores = result.VoterScores as IEnumerable<dynamic>;
+
+            <div class="card mb-3 result-item" data-option-id="@optionId">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div class="flex-grow-1">
+                            <h6 class="mb-1">@optionLabel</h6>
+                            <div class="d-flex align-items-center gap-3">
+                                <div>
+                                    <div class="text-muted small">Durchschnitt:</div>
+                                    <div class="h4 mb-0">@averageScore.ToString("F2")</div>
+                                </div>
+                                @if (standardDeviation.HasValue)
+                                {
+                                    <div>
+                                        <div class="text-muted small">Standardabweichung:</div>
+                                        <div>@standardDeviation.Value.ToString("F2")</div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                        <span class="badge bg-primary">@totalScores Bewertungen</span>
+                    </div>
+
+                    <!-- Visual rating display -->
+                    <div class="mb-3">
+                        <div class="d-flex align-items-center gap-2">
+                            @for (var i = 1; i <= 5; i++)
+                            {
+                                if (i <= Math.Round((double)averageScore))
+                                {
+                                    <i class="bi bi-star-fill text-warning"></i>
+                                }
+                                else if (i - 0.5 <= (double)averageScore)
+                                {
+                                    <i class="bi bi-star-half text-warning"></i>
+                                }
+                                else
+                                {
+                                    <i class="bi bi-star text-muted"></i>
+                                }
+                            }
+                            <span class="text-muted small ms-2">(@averageScore.ToString("F2"))</span>
+                        </div>
+                    </div>
+
+                    @if (scoreDistribution != null && scoreDistribution.Any())
+                    {
+                        <div class="mb-3">
+                            <div class="small text-muted mb-2">Bewertungsverteilung:</div>
+                            @foreach (var scorePair in scoreDistribution.OrderBy(kvp => int.Parse(kvp.Key)))
+                            {
+                                var score = int.Parse(scorePair.Key);
+                                var count = Convert.ToInt32(scorePair.Value);
+                                var scorePercentage = totalScores > 0 ? (count * 100.0m / totalScores) : 0;
+
+                                <div class="mb-2">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <span class="small">@score Punkte</span>
+                                        <span class="small text-muted">@count (@scorePercentage.ToString("F1")%)</span>
+                                    </div>
+                                    <div class="progress" style="height: 20px;">
+                                        <div class="progress-bar bg-warning"
+                                             style="width: @scorePercentage.ToString("F1")%"
+                                             role="progressbar"
+                                             aria-valuenow="@scorePercentage"
+                                             aria-valuemin="0"
+                                             aria-valuemax="100">
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+
+                    @if (!Model.IsAnonymous && voterScores != null && voterScores.Any())
+                    {
+                        <div class="voter-details">
+                            <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#voters-@optionId">
+                                <i class="bi bi-people"></i> Wähler-Bewertungen anzeigen
+                            </button>
+                            <div class="collapse mt-2" id="voters-@optionId">
+                                <div class="card card-body bg-light">
+                                    <ul class="list-unstyled mb-0 small">
+                                        @foreach (var scoreDetail in voterScores.OrderByDescending(s => (int)(s.Score ?? 0)))
+                                        {
+                                            var voterName = (string)(scoreDetail.VoterName ?? "");
+                                            var score = (int)(scoreDetail.Score ?? 0);
+                                            <li>
+                                                <i class="bi bi-person"></i> @voterName: <strong>@score Punkte</strong>
+                                            </li>
+                                        }
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+}
+else
+{
+    <div class="alert alert-info">
+        <i class="bi bi-info-circle"></i> Keine Ergebnisse verfügbar.
+    </div>
+}

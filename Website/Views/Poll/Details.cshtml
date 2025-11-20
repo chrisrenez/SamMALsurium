@@ -1,0 +1,247 @@
+@model PollDetailsViewModel
+
+@{
+    ViewData["Title"] = Model.Title;
+    var pollTypeName = Model.Type switch
+    {
+        PollType.MultipleChoice => "Multiple Choice",
+        PollType.RankedChoice => "Rangfolge",
+        PollType.ScoreVoting => "Bewertung",
+        PollType.AvailabilityGrid => "Verfügbarkeit",
+        _ => Model.Type.ToString()
+    };
+}
+
+<div class="container-xxl mt-4">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            @if (Model.EventId.HasValue)
+            {
+                <li class="breadcrumb-item"><a href="@Url.Action("Details", "Event", new { id = Model.EventId })">@Model.EventTitle</a></li>
+            }
+            else
+            {
+                <li class="breadcrumb-item"><a href="@Url.Action("Index", "Home")">Home</a></li>
+            }
+            <li class="breadcrumb-item active" aria-current="page">@Model.Title</li>
+        </ol>
+    </nav>
+
+    <!-- Poll Header -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start flex-wrap mb-3">
+                <div>
+                    <h1 class="h3 mb-2">@Model.Title</h1>
+                    <div class="d-flex gap-2 flex-wrap">
+                        <span class="badge bg-secondary">@pollTypeName</span>
+                        @if (Model.Status == PollStatus.Active)
+                        {
+                            <span class="badge bg-success">Aktiv</span>
+                        }
+                        else if (Model.Status == PollStatus.Closed)
+                        {
+                            <span class="badge bg-secondary">Geschlossen</span>
+                        }
+                        else if (Model.Status == PollStatus.Archived)
+                        {
+                            <span class="badge bg-dark">Archiviert</span>
+                        }
+
+                        @if (Model.HasUserVoted)
+                        {
+                            <span class="badge bg-info">
+                                <i class="bi bi-check-circle"></i> Sie haben abgestimmt
+                            </span>
+                        }
+
+                        @if (Model.EndDate.HasValue && Model.EndDate.Value > DateTime.UtcNow && (Model.EndDate.Value - DateTime.UtcNow).TotalHours < 24)
+                        {
+                            <span class="badge bg-warning text-dark">
+                                <i class="bi bi-clock"></i> Endet bald
+                            </span>
+                        }
+                    </div>
+                </div>
+                <div class="text-muted">
+                    <i class="bi bi-people"></i> @Model.TotalVotes @(Model.TotalVotes == 1 ? "Stimme" : "Stimmen")
+                </div>
+            </div>
+
+            @if (!string.IsNullOrEmpty(Model.Description))
+            {
+                <p class="mb-3">@Model.Description</p>
+            }
+
+            <div class="row text-muted small">
+                @if (Model.StartDate.HasValue)
+                {
+                    <div class="col-md-6 mb-2">
+                        <i class="bi bi-calendar-event"></i> Startet: @Model.StartDate.Value.ToLocalTime().ToString("dd.MM.yyyy HH:mm")
+                    </div>
+                }
+                @if (Model.EndDate.HasValue)
+                {
+                    <div class="col-md-6 mb-2">
+                        <i class="bi bi-calendar-x"></i> Endet: @Model.EndDate.Value.ToLocalTime().ToString("dd.MM.yyyy HH:mm")
+                    </div>
+                }
+                @if (Model.IsAnonymous)
+                {
+                    <div class="col-md-6 mb-2">
+                        <i class="bi bi-incognito"></i> Anonyme Abstimmung
+                    </div>
+                }
+                @if (Model.AllowVoteChange)
+                {
+                    <div class="col-md-6 mb-2">
+                        <i class="bi bi-arrow-repeat"></i> Stimme kann geändert werden
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Voting Interface or Results -->
+    @if (Model.CanVote && !Model.HasUserVoted)
+    {
+        <!-- Show voting interface -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Abstimmen</h5>
+            </div>
+            <div class="card-body">
+                @if (Model.Type == PollType.MultipleChoice)
+                {
+                    @await Html.PartialAsync("_InlineMultipleChoice", Model)
+                }
+                else if (Model.Type == PollType.ScoreVoting)
+                {
+                    @await Html.PartialAsync("_InlineScoreVoting", Model)
+                }
+                else if (Model.Type == PollType.RankedChoice)
+                {
+                    @await Html.PartialAsync("_RankedChoiceVoting", Model)
+                }
+                else if (Model.Type == PollType.AvailabilityGrid)
+                {
+                    @await Html.PartialAsync("_AvailabilityGrid", Model)
+                }
+            </div>
+        </div>
+    }
+    else if (Model.CanVote && Model.HasUserVoted && Model.CanChangeVote)
+    {
+        <!-- Show change vote interface -->
+        <div class="card mb-4">
+            <div class="card-header bg-warning bg-opacity-10">
+                <h5 class="mb-0">Stimme ändern</h5>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle"></i> Sie haben bereits abgestimmt. Sie können Ihre Stimme ändern oder zurückziehen.
+                </div>
+
+                @if (Model.Type == PollType.MultipleChoice)
+                {
+                    @await Html.PartialAsync("_InlineMultipleChoice", Model)
+                }
+                else if (Model.Type == PollType.ScoreVoting)
+                {
+                    @await Html.PartialAsync("_InlineScoreVoting", Model)
+                }
+                else if (Model.Type == PollType.RankedChoice)
+                {
+                    @await Html.PartialAsync("_RankedChoiceVoting", Model)
+                }
+                else if (Model.Type == PollType.AvailabilityGrid)
+                {
+                    @await Html.PartialAsync("_AvailabilityGrid", Model)
+                }
+
+                <div class="mt-3">
+                    <form asp-action="WithdrawVote" asp-route-id="@Model.Id" method="post" class="d-inline withdraw-vote-form">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn btn-outline-danger">
+                            <i class="bi bi-x-circle"></i> Stimme zurückziehen
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    }
+    else if (Model.HasUserVoted && !Model.CanChangeVote)
+    {
+        <!-- User has voted but can't change -->
+        <div class="alert alert-success">
+            <i class="bi bi-check-circle"></i> Vielen Dank für Ihre Teilnahme! Ihre Stimme wurde gespeichert.
+        </div>
+    }
+    else if (!Model.CanVote && Model.Status != PollStatus.Active)
+    {
+        <!-- Poll is closed -->
+        <div class="alert alert-secondary">
+            <i class="bi bi-lock"></i> Diese Umfrage ist geschlossen und nimmt keine weiteren Stimmen an.
+        </div>
+    }
+    else if (!Model.CanVote && Model.StartDate.HasValue && Model.StartDate > DateTime.UtcNow)
+    {
+        <!-- Poll hasn't started yet -->
+        <div class="alert alert-info">
+            <i class="bi bi-clock"></i> Diese Umfrage beginnt am @Model.StartDate.Value.ToLocalTime().ToString("dd.MM.yyyy HH:mm").
+        </div>
+    }
+
+    <!-- Results Section -->
+    @if (Model.CanViewResults)
+    {
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Ergebnisse</h5>
+                <a href="@Url.Action("Results", new { id = Model.Id })" class="btn btn-sm btn-primary">
+                    <i class="bi bi-bar-chart"></i> Detaillierte Ergebnisse
+                </a>
+            </div>
+            <div class="card-body">
+                <p class="text-muted">
+                    Klicken Sie auf "Detaillierte Ergebnisse", um die vollständigen Abstimmungsergebnisse zu sehen.
+                </p>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-secondary">
+            <i class="bi bi-eye-slash"></i>
+            @if (Model.ResultsVisibility == ResultsVisibility.AfterVoting)
+            {
+                <span>Die Ergebnisse sind nach der Abstimmung oder nach Schließung der Umfrage sichtbar.</span>
+            }
+            else if (Model.ResultsVisibility == ResultsVisibility.CreatorOnly)
+            {
+                <span>Die Ergebnisse sind nur für den Ersteller der Umfrage sichtbar.</span>
+            }
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script type="module" src="~/js/Polls/MultipleChoiceVoting.js"></script>
+    <script type="module" src="~/js/Polls/ScoreVoting.js"></script>
+    <script type="module" src="~/js/Polls/RankedChoiceVoting.js"></script>
+    <script type="module" src="~/js/Polls/AvailabilityGrid.js"></script>
+    <script>
+        // Withdraw vote confirmation
+        document.addEventListener('DOMContentLoaded', function() {
+            const withdrawForms = document.querySelectorAll('.withdraw-vote-form');
+            withdrawForms.forEach(form => {
+                form.addEventListener('submit', function(e) {
+                    if (!confirm('Sind Sie sicher, dass Sie Ihre Stimme zurückziehen möchten? Dies kann nicht rückgängig gemacht werden.')) {
+                        e.preventDefault();
+                    }
+                });
+            });
+        });
+    </script>
+}
